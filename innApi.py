@@ -63,9 +63,9 @@ def main(inn):
 	def writeJSON():
 		with open("data_file.json", "w") as write_file:
 			json.dump(data, write_file,ensure_ascii=False)
-		return (type(write_file))
-	cc = writeJSON()
-	print(cc)			
+		#return (type(write_file))
+	writeJSON()
+	#print(cc)			
 			
 if __name__ == "__main__":
 	main(sys.argv[1])
