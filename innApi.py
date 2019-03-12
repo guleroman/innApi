@@ -1,6 +1,7 @@
 import requests, bs4, sys, json
 
-def main(inn):
+def mainn(inn):
+	print (inn)
 	def start(link2):
 		all_info = []
 		site = requests.get(link2)
@@ -63,9 +64,10 @@ def main(inn):
 	def writeJSON():
 		with open("data_file.json", "w") as write_file:
 			json.dump(data, write_file,ensure_ascii=False)
-		return (type(write_file))
-	cc = writeJSON()
-	print(cc)			
+		#return (type(write_file))
+	writeJSON()
+	#print(cc)			
 			
 if __name__ == "__main__":
-	main(sys.argv[1])
+	print (sys.argv[1])
+	mainn(sys.argv[1])
