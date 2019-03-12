@@ -1,6 +1,7 @@
 import requests, bs4, sys, json
 
 def main(inn):
+	print (inn)
 	def start(link2):
 		all_info = []
 		site = requests.get(link2)
@@ -68,4 +69,5 @@ def main(inn):
 	#print(cc)			
 			
 if __name__ == "__main__":
+	print (sys.argv[1])
 	main(sys.argv[1])
