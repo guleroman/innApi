@@ -8,9 +8,9 @@ app = Flask(__name__)
 signal.signal(signal.SIGINT, lambda s, f: os._exit(0))
 
 @app.route("/")
-def get_data():
+def mainn():
     page = '<html><body><h1>'
-    page += innApi.get_data()
+    page += innApi.mainn()
     page += '</h1></body></html>'
     return page
 
