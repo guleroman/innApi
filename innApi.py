@@ -1,6 +1,6 @@
 import requests, bs4, sys, json
 
-def main(inn):
+def mainn(inn):
 	print (inn)
 	def start(link2):
 		all_info = []
@@ -70,4 +70,4 @@ def main(inn):
 			
 if __name__ == "__main__":
 	print (sys.argv[1])
-	main(sys.argv[1])
+	mainn(sys.argv[1])
