@@ -15,7 +15,7 @@ def mainn(inn):
 		link = 'https://огрн.онлайн/компании/?поиск='
 		link2 = link + inn
 		name_1, name_2,all_info = start(link2)
-		name = name_1[0].getText()
+		name = name_1[0].getText().replace('\"','')
 		
 		for i in range(3,18,2):
 			all_info = all_info + [name_2[i].getText().replace('\n','').replace('\r','').replace('  ','')]
@@ -34,7 +34,8 @@ def mainn(inn):
 
 	#inn = '7813054277'
 	data = company(inn)
-	print (data)
+	#print (data)
+	return (data)
 		#return (a)
 		#def personal():
 		#	link = 'https://огрн.онлайн/люди/?инн='
@@ -61,11 +62,11 @@ def mainn(inn):
 		#print (data)
 
 		# Производим запись в JSON файл
-	def writeJSON():
-		with open("data_file.json", "w") as write_file:
-			json.dump(data, write_file,ensure_ascii=False)
+	#def writeJSON():
+		#with open("data_file.json", "w") as write_file:
+			#json.dump(data, write_file,ensure_ascii=False)
 		#return (type(write_file))
-	writeJSON()
+	#writeJSON()
 	#print(cc)			
 			
 if __name__ == "__main__":
