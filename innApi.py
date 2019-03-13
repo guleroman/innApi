@@ -7,7 +7,7 @@ def mainn(inn):
 		site = requests.get(link2)
 		bb = bs4.BeautifulSoup(site.text, "html.parser")
 		name_1 = bb.select('div.page-header h1') # Название организации/ИП
-		name_2 = bb.select('.table.table-striped.table-hover td') # Значения из таблицы	
+		name_2 = bb.select('.table.table-striped.table-hover td') # Неструктурированная инфа из таблицы на сайте	
 		return (name_1,name_2,all_info)
 
 
@@ -31,11 +31,10 @@ def mainn(inn):
 		}
 		return (data)
 		
-
-	#inn = '7813054277'
 	data = company(inn)
-	#print (data)
 	return (data)
+	
+	#____________________________________________________<для выгрузки инфы по инн для ИП>
 		#return (a)
 		#def personal():
 		#	link = 'https://огрн.онлайн/люди/?инн='
@@ -67,7 +66,8 @@ def mainn(inn):
 			#json.dump(data, write_file,ensure_ascii=False)
 		#return (type(write_file))
 	#writeJSON()
-	#print(cc)			
+	#print(cc)
+	#____________________________________________________</для выгрузки инфы по инн для ИП>
 			
 if __name__ == "__main__":
 	print (sys.argv[1])
