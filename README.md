@@ -2,7 +2,7 @@
 ## Описание
 Веб-сервис для получения юридической информации об организации по ИНН.
 
-## Подготовка
+## Deployment
 ### 1. With Dockerfile
 #### 1.1 Download the full repository located on this page
 ```
