@@ -1,2 +1,6 @@
 flask
 dadata-client
+datetime
+docxtpl
+num2words
+pandas
