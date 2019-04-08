@@ -44,6 +44,7 @@ def main2():
     nds = 20
     nds_2 = "20 %"
     nds_3 = "НДС " + nds_2
+    var_23 = ''
     if company['cid'][cid]['nds'] == 1:
         nds = 0
         nds_2 = ''
@@ -62,6 +63,7 @@ def main2():
                 int(pr[i])*int(company['cid'][cid]['pid'][pid[i]]['price'])]
     summa = table['t_sum'].sum()
     nds_4 = round(summa / 1.2 * 0.2,2)
+    nds_5 = ', в том числе НДС:' + str(nds_4)
     for i in range(len(table),5):
         table.loc[len(table)] = [
             '',
@@ -74,8 +76,8 @@ def main2():
             
     if company['cid'][cid]['nds'] == 1:
         nds_4 = ''
-
-            
+        nds_5 = ''
+        var_23 = 'Стоимость услуг НДС не облагается в связи с применением Исполнителем упрощенной системы налогообложения.'
     doc = DocxTemplate("tpl_invoice.docx")
     context = { 
         'var0' : nds,
@@ -143,10 +145,162 @@ def main2():
         'var19' : num2words(int(summa), lang='ru')
         }
     doc.render(context)
-    doc.save("generated_doc.docx")
+    doc.save("generated_doc_1.docx")
+    
+#_____________________________________________________
+    doc = DocxTemplate("tpl_invoice_2.docx")
+    context = {
+        'var2' : company['cid'][cid]['inn'],
+        'var3' : company['cid'][cid]['kpp'],
+        'var4' : company['cid'][cid]['name'],
+        'var8' : num['number'],
+        'var9' : datetime.datetime.today().strftime("%d.%m.%Y"),
+        'var10' : company['cid'][cid]['address'],
+        'var11' : data['value'],
+        'var12' : data['data']['inn'],
+        'var13' : data['data']['kpp'],
+        'var14' : data['data']['address']['value'],
+        'var15' : nds_3,
+        
+        'n1' : table.iloc[0]['t_num'],
+        'n2' : table.iloc[1]['t_num'],
+        'n3' : table.iloc[2]['t_num'],
+        'n4' : table.iloc[3]['t_num'],
+        'n5' : table.iloc[4]['t_num'],
+        
+        'product1' : table.iloc[0]['t_products'],
+        'product2' : table.iloc[1]['t_products'],
+        'product3' : table.iloc[2]['t_products'],
+        'product4' : table.iloc[3]['t_products'],
+        'product5' : table.iloc[4]['t_products'],
+        
+        'kol1' : table.iloc[0]['t_kol'],
+        'kol2' : table.iloc[1]['t_kol'],
+        'kol3' : table.iloc[2]['t_kol'],
+        'kol4' : table.iloc[3]['t_kol'],
+        'kol5' : table.iloc[4]['t_kol'],
+        
+        'ed1' : table.iloc[0]['t_ed'],
+        'ed2' : table.iloc[1]['t_ed'],
+        'ed3' : table.iloc[2]['t_ed'],
+        'ed4' : table.iloc[3]['t_ed'],
+        'ed5' : table.iloc[4]['t_ed'],
+
+        'nds1' : table.iloc[0]['t_nds'],
+        'nds2' : table.iloc[1]['t_nds'],
+        'nds3' : table.iloc[2]['t_nds'],
+        'nds4' : table.iloc[3]['t_nds'],
+        'nds5' : table.iloc[4]['t_nds'],
+        
+        'price1' : table.iloc[0]['t_price'],
+        'price2' : table.iloc[1]['t_price'],
+        'price3' : table.iloc[2]['t_price'],
+        'price4' : table.iloc[3]['t_price'],
+        'price5' : table.iloc[4]['t_price'],
+        
+        'summ1' : table.iloc[0]['t_sum'],
+        'summ2' : table.iloc[1]['t_sum'],
+        'summ3' : table.iloc[2]['t_sum'],
+        'summ4' : table.iloc[3]['t_sum'],
+        'summ5' : table.iloc[4]['t_sum'],
+
+        'var17' : nds_4,
+        'var18' : str(summa),
+        'var19' : num2words(int(summa), lang='ru')
+        }
+    doc.render(context)
+    doc.save("generated_doc_2.docx")
+#_____________________________________________________
+
+#_____________________________________________________
+    doc = DocxTemplate("tpl_invoice_3.docx")
+    context = {
+       'var1' : company['cid'][cid]['bank'],
+        'var2' : company['cid'][cid]['inn'],
+        'var3' : company['cid'][cid]['kpp'],
+        'var4' : company['cid'][cid]['name'],
+        'var5' : company['cid'][cid]['bik'],
+        'var6' : company['cid'][cid]['account1'],
+        'var7' : company['cid'][cid]['account2'],
+        'var8' : num['number'],
+        'var9' : datetime.datetime.today().strftime("%d.%m.%Y"),
+        'var10' : company['cid'][cid]['address'],
+        'var11' : data['value'],
+        'var12' : data['data']['inn'],
+        'var13' : data['data']['kpp'],
+        'var14' : data['data']['address']['value'],
+        
+        'n1' : table.iloc[0]['t_num'],
+        'n2' : table.iloc[1]['t_num'],
+        'n3' : table.iloc[2]['t_num'],
+        'n4' : table.iloc[3]['t_num'],
+        'n5' : table.iloc[4]['t_num'],
+        
+        'product1' : table.iloc[0]['t_products'],
+        'product2' : table.iloc[1]['t_products'],
+        'product3' : table.iloc[2]['t_products'],
+        'product4' : table.iloc[3]['t_products'],
+        'product5' : table.iloc[4]['t_products'],
+        
+        'kol1' : table.iloc[0]['t_kol'],
+        'kol2' : table.iloc[1]['t_kol'],
+        'kol3' : table.iloc[2]['t_kol'],
+        'kol4' : table.iloc[3]['t_kol'],
+        'kol5' : table.iloc[4]['t_kol'],
+        
+        'ed1' : table.iloc[0]['t_ed'],
+        'ed2' : table.iloc[1]['t_ed'],
+        'ed3' : table.iloc[2]['t_ed'],
+        'ed4' : table.iloc[3]['t_ed'],
+        'ed5' : table.iloc[4]['t_ed'],
+
+        'nds1' : table.iloc[0]['t_nds'],
+        'nds2' : table.iloc[1]['t_nds'],
+        'nds3' : table.iloc[2]['t_nds'],
+        'nds4' : table.iloc[3]['t_nds'],
+        'nds5' : table.iloc[4]['t_nds'],
+        
+        'price1' : table.iloc[0]['t_price'],
+        'price2' : table.iloc[1]['t_price'],
+        'price3' : table.iloc[2]['t_price'],
+        'price4' : table.iloc[3]['t_price'],
+        'price5' : table.iloc[4]['t_price'],
+        
+        'summ1' : table.iloc[0]['t_sum'],
+        'summ2' : table.iloc[1]['t_sum'],
+        'summ3' : table.iloc[2]['t_sum'],
+        'summ4' : table.iloc[3]['t_sum'],
+        'summ5' : table.iloc[4]['t_sum'],
+
+        'var18' : str(summa),
+        'var19' : num2words(int(summa), lang='ru'),
+        
+        'var20' : data['data']['ogrn'],
+        'var21' : company['cid'][cid]['ogrn'],
+        'var22' : nds_5,
+        'var23' : var_23
+        }
+    doc.render(context)
+    doc.save("generated_doc_3.docx")
+#_____________________________________________________
+
+        #return send_file("generated_doc_"+ str(i)+".docx", as_attachment=True, attachment_filename='report_'+str(i)+'.doc')
     num['number'] = num['number'] + 1
     with open("iteration.json", "w") as write_file:
         json.dump(num, write_file)
-    return send_file("generated_doc.docx", as_attachment=True, attachment_filename='report.doc')
+    #a1 = send_file("generated_doc_2.docx", as_attachment=True, attachment_filename='report_2.doc')
+    #a2 = send_file("generated_doc_1.docx", as_attachment=True, attachment_filename='report_1.doc')
+    #from werkzeug import SharedDataMiddleware
+    #app.add_url_rule('/uploads/<filename>', 'uploaded_file',
+    #                 build_only=True)
+    #app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
+     #   '/uploads':  app.config['UPLOAD_FOLDER']
+    #th2.start()
+    #return jsonify('ok')
+    #send_file("generated_doc_"+ str(i)+".docx", as_attachment=True, attachment_filename='report_'+str(i)+'.doc')
+    #return send_file("generated_doc_1.docx", as_attachment=True, attachment_filename='report_1.doc')
+    return jsonify('Ok')
+
 if __name__ == '__main__':
-    app.run(debug=True ,host='0.0.0.0', port=5000)
+    app.run(debug=True,host='0.0.0.0', port=5000)
+
