@@ -4,3 +4,4 @@ datetime
 docxtpl
 num2words
 pandas
+uuid

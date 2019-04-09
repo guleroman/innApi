@@ -1,11 +1,13 @@
 #!flask/bin/python
-from flask import Flask, jsonify, request, json, url_for, send_file
+from flask import Flask, jsonify, request, json, send_file
 from docxtpl import DocxTemplate
-from num2words import num2words
-import innApi_v2, datetime
+from num2words import num2words   
+import innApi_v2, datetime, uuid
 import pandas as pd
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
+import uuid
+key = str(uuid.uuid4())
 
 @app.route('/api/inn/', methods=['GET'])
 def main():
@@ -16,10 +18,7 @@ def main():
 @app.route('/api/doc/', methods=['GET'])
 def main2():
     pid = []
-    #pid_2 = []
     pr = []
-    #pr_2 = []
-    #dic = dict()
     inn=request.args.get('inn')
     cid=request.args.get('cid')
     
@@ -145,7 +144,7 @@ def main2():
         'var19' : num2words(int(summa), lang='ru')
         }
     doc.render(context)
-    doc.save("generated_doc_1.docx")
+    doc.save("doc_1_"+key+".docx")
     
 #_____________________________________________________
     doc = DocxTemplate("tpl_invoice_2.docx")
@@ -209,7 +208,7 @@ def main2():
         'var19' : num2words(int(summa), lang='ru')
         }
     doc.render(context)
-    doc.save("generated_doc_2.docx")
+    doc.save("doc_2_"+key+".docx")
 #_____________________________________________________
 
 #_____________________________________________________
@@ -281,25 +280,17 @@ def main2():
         'var23' : var_23
         }
     doc.render(context)
-    doc.save("generated_doc_3.docx")
+    doc.save("doc_3_"+key+".docx")
 #_____________________________________________________
 
-        #return send_file("generated_doc_"+ str(i)+".docx", as_attachment=True, attachment_filename='report_'+str(i)+'.doc')
     num['number'] = num['number'] + 1
     with open("iteration.json", "w") as write_file:
         json.dump(num, write_file)
-    #a1 = send_file("generated_doc_2.docx", as_attachment=True, attachment_filename='report_2.doc')
-    #a2 = send_file("generated_doc_1.docx", as_attachment=True, attachment_filename='report_1.doc')
-    #from werkzeug import SharedDataMiddleware
-    #app.add_url_rule('/uploads/<filename>', 'uploaded_file',
-    #                 build_only=True)
-    #app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
-     #   '/uploads':  app.config['UPLOAD_FOLDER']
-    #th2.start()
-    #return jsonify('ok')
-    #send_file("generated_doc_"+ str(i)+".docx", as_attachment=True, attachment_filename='report_'+str(i)+'.doc')
-    #return send_file("generated_doc_1.docx", as_attachment=True, attachment_filename='report_1.doc')
-    return jsonify('Ok')
+    return "Hello ПримаДокументы! <br><br> <a href=/getfile/doc_1_"+key+".docx>Cчет на оплату</a><br><br><a href=/getfile/doc_2_"+key+".docx>Акт</a><br><br><a href=/getfile/doc_3_"+key+".docx>Договор о предоставлении услуг</a><br><br>"
+
+@app.route('/getfile/<name>')
+def get_output_file(name):
+    return send_file(name, as_attachment=True)
 
 if __name__ == '__main__':
     app.run(debug=True,host='0.0.0.0', port=5000)
