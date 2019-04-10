@@ -6,13 +6,11 @@ import innApi_v2, datetime, uuid
 import pandas as pd
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
-import uuid
-key = str(uuid.uuid4())
 
 @app.route('/api/inn/', methods=['GET'])
 def main():
     inn=request.args.get('inn')
-    data = innApi_v2.mainn(inn)
+    data,key = innApi_v2.mainn(inn)
     return jsonify(data)#{'Реквизиты': data})
 
 @app.route('/api/doc/', methods=['GET'])
@@ -32,7 +30,7 @@ def main2():
     pr.append(request.args.get('pr3'))
     pr.append(request.args.get('pr4'))
     pr.append(request.args.get('pr5'))
-    data = innApi_v2.mainn(inn)
+    data,key = innApi_v2.mainn(inn)
     
     #загрузить из json
     with open('company.json', 'r', encoding='utf-8') as fh: #открываем файл на чтение
@@ -50,15 +48,17 @@ def main2():
         nds_3 = ''
     #Заполняем таблицу DF    
     table = pd.DataFrame({'t_num':[],'t_products':[],'t_kol':[],'t_ed':[],'t_nds':[],'t_price':[],'t_sum':[]})
+    table = table[['t_num','t_products','t_kol','t_ed','t_nds','t_price','t_sum']]
+    print (table)
     for i in range(len(pid)):
         if pid[i] is not None:
             table.loc[len(table)] = [
-                str(company['cid'][cid]['pid'][pid[i]]['ed']),
-                str(pr[i]),
-                str(nds_2),
                 str(len(table)+1),
-                company['cid'][cid]['pid'][pid[i]]['price'],
                 str(company['cid'][cid]['pid'][pid[i]]['name']),
+                str(pr[i]),
+                str(company['cid'][cid]['pid'][pid[i]]['ed']),
+                str(nds_2),
+                company['cid'][cid]['pid'][pid[i]]['price'],
                 int(pr[i])*int(company['cid'][cid]['pid'][pid[i]]['price'])]
     summa = table['t_sum'].sum()
     nds_4 = round(summa / 1.2 * 0.2,2)
