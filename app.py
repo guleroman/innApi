@@ -44,7 +44,7 @@ def main2():
     var_23 = ''
     if company['cid'][cid]['nds'] == 1:
         nds = 0
-        nds_2 = ''
+        nds_2 = '-'
         nds_3 = ''
     #Заполняем таблицу DF    
     table = pd.DataFrame({'t_num':[],'t_products':[],'t_kol':[],'t_ed':[],'t_nds':[],'t_price':[],'t_sum':[]})
@@ -95,7 +95,7 @@ def main2():
         'var13' : data['data']['kpp'],
         'var14' : data['data']['address']['value'],
         'var15' : nds_3,
-        'var16' : (datetime.datetime.now() + datetime.timedelta(days=15)).strftime('%d.%m.%Y'),
+        'var16' : (datetime.datetime.now() + datetime.timedelta(days=3)).strftime('%d.%m.%Y'),
         
         'n1' : table.iloc[0]['t_num'],
         'n2' : table.iloc[1]['t_num'],
@@ -293,5 +293,5 @@ def get_output_file(name):
     return send_file(name, as_attachment=True)
 
 if __name__ == '__main__':
-    app.run(debug=True,host='0.0.0.0', port=5000)
+    app.run(debug=False,host='0.0.0.0', port=5000)
 
