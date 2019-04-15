@@ -331,85 +331,99 @@ def main3(provider_inn):
     
     ##Договор о предоставлении услуг(Ростелеком)
     #_____________________________________________________
-    #doc = DocxTemplate("tpl_invoice_4.docx")
-    #context = {
-    #    'var0' : datetime.datetime.today().strftime("%d.%m.%Y"),
-    #    'var1' : data['data']['name']['full_with_opf'],
-    #    'var2' : data['data']['address']['data']["city_with_type"],
-    #    'var3' : data['data']['name']['full_with_opf'],
-    #    'var4' : data['data']['name']['full_with_opf'],
-    #    'var5' : data['data']['name']['full_with_opf'],
+    doc = DocxTemplate("tpl_invoice_4.docx")
+    context = {
+        'var0' : datetime.datetime.today().strftime("%d.%m.%Y"),
+        'var1' : data['data']['name']['full_with_opf'],
+        'var2' : data['data']['address']['data']["city_with_type"],
+        'var3' : data['data']['management']['name'].split()[0],
+        'var4' : data['data']['management']['name'].split()[1],
+        'var5' : data['data']['management']['name'].split()[2],
+        'var6' : data['data']['address']['data']['postal_code'],
+        'var7' : data['data']['address']['data']['region'],
+        'var8' : data['data']['address']['data']['city_district'],
+        'var9' : data['data']['address']['data']['city'],
+        'var10' : data['data']['address']['data']['street_with_type'],
+        'var11' : data['data']['address']['data']['house'],
+        'var12' : data['data']['address']['value'],
+        'var13' : data['data']['ogrn'],
+        'var14' : data['data']['inn'],
+        'var15' : data['data']['kpp'],
+        'var16' : data['data']['okpo'],
+        'var17' : data['data']['management']['name'],
+        'var18' : product_title,
+        'var19' : num['number'],
+       # 'var20' : data
 #
 #
 #
+       # 'var1' : provider_bank,
+       # 'var2' : provider_inn,
+       # 'var3' : provider_kpp,
+       # 'var4' : provider_name,
+       # 'var5' : provider_bik,
+       # 'var6' : provider_account1,
+       # 'var7' : provider_account2,
+       # 'var8' : num['number'],
+       # 'var9' : datetime.datetime.today().strftime("%d.%m.%Y"),
+       # 'var10' : provider_address,
+       # 'var11' : data['value'],
+       # 'var12' : data['data']['inn'],
+       # 'var13' : data['data']['kpp'],
+       # 'var14' : data['data']['address']['value'],
+       # 
+       # 'n1' : table.iloc[0]['t_num'],
+       # 'n2' : table.iloc[1]['t_num'],
+       # 'n3' : table.iloc[2]['t_num'],
+       # 'n4' : table.iloc[3]['t_num'],
+       # 'n5' : table.iloc[4]['t_num'],
+       # 
+        'product1' : table.iloc[0]['t_products'],
+        'product2' : table.iloc[1]['t_products'],
+        'product3' : table.iloc[2]['t_products'],
+        'product4' : table.iloc[3]['t_products'],
+        'product5' : table.iloc[4]['t_products'],
+       # 
+        'kol1' : table.iloc[0]['t_kol'],
+        'kol2' : table.iloc[1]['t_kol'],
+        'kol3' : table.iloc[2]['t_kol'],
+        'kol4' : table.iloc[3]['t_kol'],
+        'kol5' : table.iloc[4]['t_kol'],
+       # 
+        'ed1' : table.iloc[0]['t_ed'],
+        'ed2' : table.iloc[1]['t_ed'],
+        'ed3' : table.iloc[2]['t_ed'],
+        'ed4' : table.iloc[3]['t_ed'],
+        'ed5' : table.iloc[4]['t_ed'],
 #
-    #    'var1' : provider_bank,
-    #    'var2' : provider_inn,
-    #    'var3' : provider_kpp,
-    #    'var4' : provider_name,
-    #    'var5' : provider_bik,
-    #    'var6' : provider_account1,
-    #    'var7' : provider_account2,
-    #    'var8' : num['number'],
-    #    'var9' : datetime.datetime.today().strftime("%d.%m.%Y"),
-    #    'var10' : provider_address,
-    #    'var11' : data['value'],
-    #    'var12' : data['data']['inn'],
-    #    'var13' : data['data']['kpp'],
-    #    'var14' : data['data']['address']['value'],
-    #    
-    #    'n1' : table.iloc[0]['t_num'],
-    #    'n2' : table.iloc[1]['t_num'],
-    #    'n3' : table.iloc[2]['t_num'],
-    #    'n4' : table.iloc[3]['t_num'],
-    #    'n5' : table.iloc[4]['t_num'],
-    #    
-    #    'product1' : table.iloc[0]['t_products'],
-    #    'product2' : table.iloc[1]['t_products'],
-    #    'product3' : table.iloc[2]['t_products'],
-    #    'product4' : table.iloc[3]['t_products'],
-    #    'product5' : table.iloc[4]['t_products'],
-    #    
-    #    'kol1' : table.iloc[0]['t_kol'],
-    #    'kol2' : table.iloc[1]['t_kol'],
-    #    'kol3' : table.iloc[2]['t_kol'],
-    #    'kol4' : table.iloc[3]['t_kol'],
-    #    'kol5' : table.iloc[4]['t_kol'],
-    #    
-    #    'ed1' : table.iloc[0]['t_ed'],
-    #    'ed2' : table.iloc[1]['t_ed'],
-    #    'ed3' : table.iloc[2]['t_ed'],
-    #    'ed4' : table.iloc[3]['t_ed'],
-    #    'ed5' : table.iloc[4]['t_ed'],
+       # 'nds1' : table.iloc[0]['t_nds'],
+       # 'nds2' : table.iloc[1]['t_nds'],
+       # 'nds3' : table.iloc[2]['t_nds'],
+       # 'nds4' : table.iloc[3]['t_nds'],
+       # 'nds5' : table.iloc[4]['t_nds'],
+       # 
+       # 'price1' : table.iloc[0]['t_price'],
+       # 'price2' : table.iloc[1]['t_price'],
+       # 'price3' : table.iloc[2]['t_price'],
+       # 'price4' : table.iloc[3]['t_price'],
+       # 'price5' : table.iloc[4]['t_price'],
+       # 
+        'summ1' : table.iloc[0]['t_sum'],
+        'summ2' : table.iloc[1]['t_sum'],
+        'summ3' : table.iloc[2]['t_sum'],
+        'summ4' : table.iloc[3]['t_sum'],
+        'summ5' : table.iloc[4]['t_sum']
 #
-    #    'nds1' : table.iloc[0]['t_nds'],
-    #    'nds2' : table.iloc[1]['t_nds'],
-    #    'nds3' : table.iloc[2]['t_nds'],
-    #    'nds4' : table.iloc[3]['t_nds'],
-    #    'nds5' : table.iloc[4]['t_nds'],
-    #    
-    #    'price1' : table.iloc[0]['t_price'],
-    #    'price2' : table.iloc[1]['t_price'],
-    #    'price3' : table.iloc[2]['t_price'],
-    #    'price4' : table.iloc[3]['t_price'],
-    #    'price5' : table.iloc[4]['t_price'],
-    #    
-    #    'summ1' : table.iloc[0]['t_sum'],
-    #    'summ2' : table.iloc[1]['t_sum'],
-    #    'summ3' : table.iloc[2]['t_sum'],
-    #    'summ4' : table.iloc[3]['t_sum'],
-    #    'summ5' : table.iloc[4]['t_sum'],
-#
-    #    'var18' : summa_str,
-    #    'var19' : num2words(int(summa), lang='ru'),
-    #    
-    #    'var20' : data['data']['ogrn'],
-    #    'var21' : provider_ogrn,
-    #    'var22' : nds_5,
-    #    'var23' : nds_6
-    #    }
-    #doc.render(context)
-    #doc.save("doc_4_"+key+".docx")
+       # 'var18' : summa_str,
+       # 'var19' : num2words(int(summa), lang='ru'),
+       # 
+       # 'var20' : data['data']['ogrn'],
+       # 'var21' : provider_ogrn,
+       # 'var22' : nds_5,
+       # 'var23' : nds_6
+        }
+    doc.render(context)
+    doc.save("doc_4_"+key+".docx")
 
     #Запись в историю
     #with open('history.json', 'r',encoding='utf-8') as fh: #открываем файл с данными о исполнителях на чтение
@@ -434,7 +448,7 @@ def main3(provider_inn):
         json.dump(num, write_file)
 
     #Формируем ответ    
-    responseJson = {"contract_url": "/getfile/doc_3_"+key+".docx","act_url": "/getfile/doc_2_"+key+".docx","invoice_url": "/getfile/doc_1_"+key+".docx"}
+    responseJson = {"contractRT_url": "/getfile/doc_4_"+key+".docx","contract_url": "/getfile/doc_3_"+key+".docx","act_url": "/getfile/doc_2_"+key+".docx","invoice_url": "/getfile/doc_1_"+key+".docx"}
     return jsonify(responseJson)
 
 #Точка входа для скачивания файлов
