@@ -326,12 +326,29 @@ def main3(provider_inn):
         }
     doc.render(context)
     doc.save("doc_3_"+key+".docx")
+    
+    #Запись в историю
+    with open('history.json', 'r') as fh: #открываем файл с данными о исполнителях на чтение
+        history = json.load(fh)
+   #cacheHistory = {str(provider_inn): 
+   #    {
+   #    "number": num['number'],
+   #    "provider":provider_name,
+   #    "client": data['value'],
+   #    "act_url":"/getfile/doc_2_"+key+".docx",
+   #    "contract_url":"/getfile/doc_3_"+key+".docx",
+   #    "invoice_url":"/getfile/doc_1_"+key+".docx",
+   #    "date_creation":datetime.datetime.today().strftime("%H:%M-%d.%m.%Y")
+   #    }}
+   #history.update(cacheHistory)    
+   #with open("history.json", "w", encoding='utf-8') as write_file:
+   #    json.dump(history, write_file)    
 
     #Плюсуем итератор количества оформленых документов
     num['number'] = num['number'] + 1
     with open("iteration.json", "w") as write_file:
         json.dump(num, write_file)
-    
+
     #Формируем ответ    
     responseJson = {"contract_url": "/getfile/doc_3_"+key+".docx","act_url": "/getfile/doc_2_"+key+".docx","invoice_url": "/getfile/doc_1_"+key+".docx"}
     return jsonify(responseJson)
@@ -341,5 +358,14 @@ def main3(provider_inn):
 def get_output_file(name):
     return send_file(name, as_attachment=True)
 
+@app.route('/api/companies/<int:provider_inn>/documents', methods=['GET'])
+def get_documents(provider_inn):
+    provider_inn = str(provider_inn)
+    table = pd.DataFrame({'Акт':[],'Договор':[],'Счет на оплату':[],'Дата создания':[],'Заказчик':[]})
+    table = table[['Заказчик','Акт','Договор','Счет на оплату','Дата создания']] 
+    for i in range(3):
+        table.loc[len(table)] = [float('{0:.2f}'.format(1000)),'12',11223344]    
+
 if __name__ == '__main__':
+    
     app.run(debug=False,host='0.0.0.0', port=5000)
