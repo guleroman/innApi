@@ -7,62 +7,107 @@ import pandas as pd
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 
-@app.route('/api/inn/', methods=['GET'])
-def main():
-    inn=request.args.get('inn')
-    data,key = innApi_v2.mainn(inn)
-    return jsonify(data)#{'Реквизиты': data})
 
-@app.route('/api/doc/', methods=['GET'])
-def main2():
-    pid = []
-    pr = []
-    inn=request.args.get('inn')
-    cid=request.args.get('cid')
-    
-    pid.append(request.args.get('pid1'))
-    pid.append(request.args.get('pid2'))
-    pid.append(request.args.get('pid3'))
-    pid.append(request.args.get('pid4'))
-    pid.append(request.args.get('pid5'))
-    pr.append(request.args.get('pr1'))
-    pr.append(request.args.get('pr2'))
-    pr.append(request.args.get('pr3'))
-    pr.append(request.args.get('pr4'))
-    pr.append(request.args.get('pr5'))
-    data,key = innApi_v2.mainn(inn)
-    
-    #загрузить из json
-    with open('company.json', 'r', encoding='utf-8') as fh: #открываем файл на чтение
+@app.route('/api/companies/<int:provider_inn>/documents', methods=['POST'])
+def main3(provider_inn):
+    provider_inn = str(provider_inn)
+
+    with open('company.json', 'r', encoding='utf-8') as fh: #открываем файл с данными о исполнителях на чтение
         company = json.load(fh)
 
-    with open("iteration.json", "r") as read_file:
+    with open("iteration.json", "r") as read_file: #открываем файл с количеством оформленных документов (итератор)
         num = json.load(read_file)
-    nds = 20
-    nds_2 = "20 %"
-    nds_3 = "НДС " + nds_2
-    var_23 = ''
-    if company['cid'][cid]['nds'] == 1:
+
+
+    #Данные о исполнителе
+    try:
+        provider_bank = company[provider_inn]['bank']
+        provider_kpp = company[provider_inn]['kpp']
+        provider_ogrn = company[provider_inn]['ogrn']
+        provider_name = company[provider_inn]['name']
+        provider_bik = company[provider_inn]['bik']
+        provider_account1 = company[provider_inn]['account1']
+        provider_account2 = company[provider_inn]['account2']
+        provider_address = company[provider_inn]['address']
+        provider_nds = company[provider_inn]['nds']
+    except KeyError:
+        data_provider = innApi_v2.mainn(provider_inn)
+        data_provider = data_provider[0]
+        provider_bank = ''
+        provider_kpp = data_provider['data']['kpp']
+        provider_ogrn = data_provider['data']['ogrn']
+        provider_name = data_provider['value']
+        provider_bik = ''
+        provider_account1 = ''
+        provider_account2 = ''
+        provider_address = data_provider['data']['address']['value']
+        provider_nds = 1
+
+        #Кешируем данные о Исполнителе
+        cacheProviderData = {str(provider_inn): 
+            {
+            "bank":"",
+            "inn":provider_inn,
+            "kpp":provider_kpp,
+            "ogrn":provider_ogrn,
+            "name":provider_name,
+            "bik":"",
+            "account1":"",
+            "account2":"",
+            "address":provider_address,
+            "nds":1
+            }}
+        company.update(cacheProviderData)
+        with open("company.json", "w", encoding='utf-8') as write_file:
+            json.dump(company, write_file)
+
+    #Создаем переменные по налогам, исходя из данных Исполнителя
+    if provider_nds == 1:
+        nds = 20
+        nds_2 = "20 %"
+        nds_3 = "НДС " + nds_2
+        nds_6 = ''
+    else:
         nds = 0
         nds_2 = '-'
         nds_3 = ''
-    #Заполняем таблицу DF    
+        nds_4 = ''
+        nds_5 = ''
+        nds_6 = 'Стоимость услуг НДС не облагается в связи с применением Исполнителем упрощенной системы налогообложения.'
+    
+    # Поступающие данные в POST запросе
+    #Данные о заказчике и перечне услуг,стоимости и тд.
+    data_post = json.loads(request.data) 
+    client_inn = data_post['client_inn'] # инн - заказчика
+    client_kpp = data_post['client_kpp']
+    product_code = data_post['product_code']
+    product_title = data_post['invoice']['title']
+
+    #Получаем данные от DaData
+    data,key = innApi_v2.mainn(client_inn)
+
+    #Заполняемм таблицу - товар/цена/стоимость и тд.
+    summa = 0
     table = pd.DataFrame({'t_num':[],'t_products':[],'t_kol':[],'t_ed':[],'t_nds':[],'t_price':[],'t_sum':[]})
-    table = table[['t_num','t_products','t_kol','t_ed','t_nds','t_price','t_sum']]
-    print (table)
-    for i in range(len(pid)):
-        if pid[i] is not None:
-            table.loc[len(table)] = [
-                str(len(table)+1),
-                str(company['cid'][cid]['pid'][pid[i]]['name']),
-                str(pr[i]),
-                str(company['cid'][cid]['pid'][pid[i]]['ed']),
-                str(nds_2),
-                company['cid'][cid]['pid'][pid[i]]['price'],
-                int(pr[i])*int(company['cid'][cid]['pid'][pid[i]]['price'])]
-    summa = table['t_sum'].sum()
-    nds_4 = round(summa / 1.2 * 0.2,2)
-    nds_5 = ', в том числе НДС:' + str(nds_4)
+    table = table[['t_num','t_products','t_kol','t_ed','t_nds','t_price','t_sum']] 
+    for i in range(len(data_post['invoice']['entries'])):
+        table.loc[len(table)] = [
+            str(len(table)+1),
+            data_post['invoice']['entries'][i]['name'],
+            str(data_post['invoice']['entries'][i]['quantity']),
+            data_post['invoice']['entries'][i]['unit'],
+            nds_2,
+            '{0:.2f}'.format(data_post['invoice']['entries'][i]['cost'] / 100),
+            '{0:.2f}'.format((data_post['invoice']['entries'][i]['quantity'] * data_post['invoice']['entries'][i]['cost'] / 100))]
+        summa = summa + (data_post['invoice']['entries'][i]['quantity'] * data_post['invoice']['entries'][i]['cost'] / 100)
+    
+    #Общая стоимость заказа
+    if provider_nds == 1:
+        nds_4 = round(summa / 1.2 * 0.2,2)
+        nds_5 = ', в том числе НДС:' + str(nds_4)
+    summa_str = '{0:.2f}'.format(summa)
+
+    #Дозапоняем пустыми значениями
     for i in range(len(table),5):
         table.loc[len(table)] = [
             '',
@@ -72,24 +117,23 @@ def main2():
             '',
             '',
             '']
-            
-    if company['cid'][cid]['nds'] == 1:
-        nds_4 = ''
-        nds_5 = ''
-        var_23 = 'Стоимость услуг НДС не облагается в связи с применением Исполнителем упрощенной системы налогообложения.'
+
+    #Генерация документов
+    ##Счет на оплату
+    #_____________________________________________________ 
     doc = DocxTemplate("tpl_invoice.docx")
     context = { 
         'var0' : nds,
-        'var1' : company['cid'][cid]['bank'],
-        'var2' : company['cid'][cid]['inn'],
-        'var3' : company['cid'][cid]['kpp'],
-        'var4' : company['cid'][cid]['name'],
-        'var5' : company['cid'][cid]['bik'],
-        'var6' : company['cid'][cid]['account1'],
-        'var7' : company['cid'][cid]['account2'],
+        'var1' : provider_bank,
+        'var2' : provider_inn,
+        'var3' : provider_kpp,
+        'var4' : provider_name,
+        'var5' : provider_bik,
+        'var6' : provider_account1,
+        'var7' : provider_account2,
         'var8' : num['number'],
         'var9' : datetime.datetime.today().strftime("%d.%m.%Y"),
-        'var10' : company['cid'][cid]['address'],
+        'var10' : provider_address,
         'var11' : data['value'],
         'var12' : data['data']['inn'],
         'var13' : data['data']['kpp'],
@@ -140,21 +184,22 @@ def main2():
         'summ5' : table.iloc[4]['t_sum'],
 
         'var17' : nds_4,
-        'var18' : str(summa),
+        'var18' : summa_str,
         'var19' : num2words(int(summa), lang='ru')
         }
     doc.render(context)
     doc.save("doc_1_"+key+".docx")
-    
-#_____________________________________________________
+
+    ##Акт о проделанных работах
+    #_____________________________________________________
     doc = DocxTemplate("tpl_invoice_2.docx")
     context = {
-        'var2' : company['cid'][cid]['inn'],
-        'var3' : company['cid'][cid]['kpp'],
-        'var4' : company['cid'][cid]['name'],
+        'var2' : provider_inn,
+        'var3' : provider_kpp,
+        'var4' : provider_name,
         'var8' : num['number'],
         'var9' : datetime.datetime.today().strftime("%d.%m.%Y"),
-        'var10' : company['cid'][cid]['address'],
+        'var10' : provider_address,
         'var11' : data['value'],
         'var12' : data['data']['inn'],
         'var13' : data['data']['kpp'],
@@ -204,26 +249,26 @@ def main2():
         'summ5' : table.iloc[4]['t_sum'],
 
         'var17' : nds_4,
-        'var18' : str(summa),
+        'var18' : summa_str,
         'var19' : num2words(int(summa), lang='ru')
         }
     doc.render(context)
     doc.save("doc_2_"+key+".docx")
-#_____________________________________________________
 
-#_____________________________________________________
+    ##Договор о предоставлении услуг
+    #_____________________________________________________
     doc = DocxTemplate("tpl_invoice_3.docx")
     context = {
-       'var1' : company['cid'][cid]['bank'],
-        'var2' : company['cid'][cid]['inn'],
-        'var3' : company['cid'][cid]['kpp'],
-        'var4' : company['cid'][cid]['name'],
-        'var5' : company['cid'][cid]['bik'],
-        'var6' : company['cid'][cid]['account1'],
-        'var7' : company['cid'][cid]['account2'],
+       'var1' : provider_bank,
+        'var2' : provider_inn,
+        'var3' : provider_kpp,
+        'var4' : provider_name,
+        'var5' : provider_bik,
+        'var6' : provider_account1,
+        'var7' : provider_account2,
         'var8' : num['number'],
         'var9' : datetime.datetime.today().strftime("%d.%m.%Y"),
-        'var10' : company['cid'][cid]['address'],
+        'var10' : provider_address,
         'var11' : data['value'],
         'var12' : data['data']['inn'],
         'var13' : data['data']['kpp'],
@@ -271,27 +316,30 @@ def main2():
         'summ4' : table.iloc[3]['t_sum'],
         'summ5' : table.iloc[4]['t_sum'],
 
-        'var18' : str(summa),
+        'var18' : summa_str,
         'var19' : num2words(int(summa), lang='ru'),
         
         'var20' : data['data']['ogrn'],
-        'var21' : company['cid'][cid]['ogrn'],
+        'var21' : provider_ogrn,
         'var22' : nds_5,
-        'var23' : var_23
+        'var23' : nds_6
         }
     doc.render(context)
     doc.save("doc_3_"+key+".docx")
-#_____________________________________________________
 
+    #Плюсуем итератор количества оформленых документов
     num['number'] = num['number'] + 1
     with open("iteration.json", "w") as write_file:
         json.dump(num, write_file)
-    return "Hello ПримаДокументы! <br><br> <a href=/getfile/doc_1_"+key+".docx>Cчет на оплату</a><br><br><a href=/getfile/doc_2_"+key+".docx>Акт</a><br><br><a href=/getfile/doc_3_"+key+".docx>Договор о предоставлении услуг</a><br><br>"
+    
+    #Формируем ответ    
+    responseJson = {"contract_url": "/getfile/doc_3_"+key+".docx","act_url": "/getfile/doc_2_"+key+".docx","invoice_url": "/getfile/doc_1_"+key+".docx"}
+    return jsonify(responseJson)
 
+#Точка входа для скачивания файлов
 @app.route('/getfile/<name>')
 def get_output_file(name):
     return send_file(name, as_attachment=True)
 
 if __name__ == '__main__':
     app.run(debug=False,host='0.0.0.0', port=5000)
-
