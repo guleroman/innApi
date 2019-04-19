@@ -123,7 +123,13 @@ def main3(provider_inn):
             '',
             '',
             '',
+            '',
             '']
+
+    #Дополнительное КПП клиента
+    if client_kpp == '':
+        client_kpp = data['data']['kpp']
+
 
     #Генерация документов
     ##Счет на оплату
@@ -357,7 +363,7 @@ def main3(provider_inn):
             'var12' : data['data']['address']['value'],
             'var13' : data['data']['ogrn'],
             'var14' : data['data']['inn'],
-            'var15' : data['data']['kpp'],
+            'var15' : client_kpp,
             'var16' : data['data']['okpo'],
             'var17' : data['data']['management']['name'],
             'var18' : product_name,
