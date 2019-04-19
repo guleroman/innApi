@@ -94,8 +94,8 @@ def main3(provider_inn):
 
     #Заполняемм таблицу - товар/цена/стоимость и тд.
     summa = 0
-    table = pd.DataFrame({'t_num':[],'t_products':[],'t_kol':[],'t_ed':[],'t_nds':[],'t_price':[],'t_sum':[]})
-    table = table[['t_num','t_products','t_kol','t_ed','t_nds','t_price','t_sum']] 
+    table = pd.DataFrame({'t_num':[],'t_products':[],'t_kol':[],'t_ed':[],'t_nds':[],'t_price':[],'t_sum':[],'t_payment_frequency':[]})
+    table = table[['t_num','t_products','t_kol','t_ed','t_nds','t_price','t_sum','t_payment_frequency']] 
     for i in range(len(data_post['payload']['invoice'])):
         table.loc[len(table)] = [
             str(len(table)+1),
@@ -104,7 +104,8 @@ def main3(provider_inn):
             data_post['payload']['invoice'][i]['unit'],
             nds_2,
             '{0:.2f}'.format(data_post['payload']['invoice'][i]['cost']),
-            '{0:.2f}'.format((data_post['payload']['invoice'][i]['quantity'] * data_post['payload']['invoice'][i]['cost']))]
+            '{0:.2f}'.format((data_post['payload']['invoice'][i]['quantity'] * data_post['payload']['invoice'][i]['cost'])),
+            payment_frequency]
         summa = summa + (data_post['payload']['invoice'][i]['quantity'] * data_post['payload']['invoice'][i]['cost'])
     
     #Общая стоимость заказа
@@ -364,7 +365,6 @@ def main3(provider_inn):
             'var20' : tariff_name,
             'var21' : tariff_users_count,
             'var22' : tariff_phone_numbers_count,
-            'var23' : payment_frequency,
 
             'product1' : table.iloc[0]['t_products'],
             'product2' : table.iloc[1]['t_products'],
@@ -388,7 +388,13 @@ def main3(provider_inn):
             'summ2' : table.iloc[1]['t_sum'],
             'summ3' : table.iloc[2]['t_sum'],
             'summ4' : table.iloc[3]['t_sum'],
-            'summ5' : table.iloc[4]['t_sum']
+            'summ5' : table.iloc[4]['t_sum'],
+
+            'payment1' : table.iloc[0]['t_payment_frequency'],
+            'payment2' : table.iloc[1]['t_payment_frequency'],
+            'payment3' : table.iloc[2]['t_payment_frequency'],
+            'payment4' : table.iloc[3]['t_payment_frequency'],
+            'payment5' : table.iloc[4]['t_payment_frequency'],
 
             }
         doc.render(context)
