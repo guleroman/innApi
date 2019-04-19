@@ -82,8 +82,12 @@ def main3(provider_inn):
     data_post = json.loads(request.data) 
     client_inn = data_post['client_inn'] # инн - заказчика
     client_kpp = data_post['client_kpp']
-    product_code = data_post['product_code']
-    product_title = data_post['invoice']['title']
+    template_code = data_post['template_code']
+    product_name = data_post['payload']['product_name']
+    tariff_name = data_post['payload']['tariff_name']
+    tariff_users_count = data_post['payload']['tariff_users_count']
+    tariff_phone_numbers_count = data_post['payload']['tariff_phone_numbers_count']
+    payment_frequency = data_post['payload']['payment_frequency']
 
     #Получаем данные от DaData
     data,key = innApi_v2.mainn(client_inn)
@@ -92,16 +96,16 @@ def main3(provider_inn):
     summa = 0
     table = pd.DataFrame({'t_num':[],'t_products':[],'t_kol':[],'t_ed':[],'t_nds':[],'t_price':[],'t_sum':[]})
     table = table[['t_num','t_products','t_kol','t_ed','t_nds','t_price','t_sum']] 
-    for i in range(len(data_post['invoice']['entries'])):
+    for i in range(len(data_post['payload']['invoice'])):
         table.loc[len(table)] = [
             str(len(table)+1),
-            data_post['invoice']['entries'][i]['name'],
-            str(data_post['invoice']['entries'][i]['quantity']),
-            data_post['invoice']['entries'][i]['unit'],
+            data_post['payload']['invoice'][i]['service_name'],
+            str(data_post['payload']['invoice'][i]['quantity']),
+            data_post['payload']['invoice'][i]['unit'],
             nds_2,
-            '{0:.2f}'.format(data_post['invoice']['entries'][i]['cost'] / 100),
-            '{0:.2f}'.format((data_post['invoice']['entries'][i]['quantity'] * data_post['invoice']['entries'][i]['cost'] / 100))]
-        summa = summa + (data_post['invoice']['entries'][i]['quantity'] * data_post['invoice']['entries'][i]['cost'] / 100)
+            '{0:.2f}'.format(data_post['payload']['invoice'][i]['cost']),
+            '{0:.2f}'.format((data_post['payload']['invoice'][i]['quantity'] * data_post['payload']['invoice'][i]['cost']))]
+        summa = summa + (data_post['payload']['invoice'][i]['quantity'] * data_post['payload']['invoice'][i]['cost'])
     
     #Общая стоимость заказа
     if provider_nds == 1:
@@ -123,308 +127,284 @@ def main3(provider_inn):
     #Генерация документов
     ##Счет на оплату
     #_____________________________________________________ 
-    doc = DocxTemplate("tpl_invoice.docx")
-    context = { 
-        'var0' : nds,
-        'var1' : provider_bank,
-        'var2' : provider_inn,
-        'var3' : provider_kpp,
-        'var4' : provider_name,
-        'var5' : provider_bik,
-        'var6' : provider_account1,
-        'var7' : provider_account2,
-        'var8' : num['number'],
-        'var9' : datetime.datetime.today().strftime("%d.%m.%Y"),
-        'var10' : provider_address,
-        'var11' : data['value'],
-        'var12' : data['data']['inn'],
-        'var13' : data['data']['kpp'],
-        'var14' : data['data']['address']['value'],
-        'var15' : nds_3,
-        'var16' : (datetime.datetime.now() + datetime.timedelta(days=3)).strftime('%d.%m.%Y'),
-        
-        'n1' : table.iloc[0]['t_num'],
-        'n2' : table.iloc[1]['t_num'],
-        'n3' : table.iloc[2]['t_num'],
-        'n4' : table.iloc[3]['t_num'],
-        'n5' : table.iloc[4]['t_num'],
-        
-        'product1' : table.iloc[0]['t_products'],
-        'product2' : table.iloc[1]['t_products'],
-        'product3' : table.iloc[2]['t_products'],
-        'product4' : table.iloc[3]['t_products'],
-        'product5' : table.iloc[4]['t_products'],
-        
-        'kol1' : table.iloc[0]['t_kol'],
-        'kol2' : table.iloc[1]['t_kol'],
-        'kol3' : table.iloc[2]['t_kol'],
-        'kol4' : table.iloc[3]['t_kol'],
-        'kol5' : table.iloc[4]['t_kol'],
-        
-        'ed1' : table.iloc[0]['t_ed'],
-        'ed2' : table.iloc[1]['t_ed'],
-        'ed3' : table.iloc[2]['t_ed'],
-        'ed4' : table.iloc[3]['t_ed'],
-        'ed5' : table.iloc[4]['t_ed'],
+    def write_invoice():
+        doc = DocxTemplate("tpl_invoice.docx")
+        context = { 
+            'var0' : nds,
+            'var1' : provider_bank,
+            'var2' : provider_inn,
+            'var3' : provider_kpp,
+            'var4' : provider_name,
+            'var5' : provider_bik,
+            'var6' : provider_account1,
+            'var7' : provider_account2,
+            'var8' : num['number'],
+            'var9' : datetime.datetime.today().strftime("%d.%m.%Y"),
+            'var10' : provider_address,
+            'var11' : data['value'],
+            'var12' : data['data']['inn'],
+            'var13' : data['data']['kpp'],
+            'var14' : data['data']['address']['value'],
+            'var15' : nds_3,
+            'var16' : (datetime.datetime.now() + datetime.timedelta(days=3)).strftime('%d.%m.%Y'),
+            
+            'n1' : table.iloc[0]['t_num'],
+            'n2' : table.iloc[1]['t_num'],
+            'n3' : table.iloc[2]['t_num'],
+            'n4' : table.iloc[3]['t_num'],
+            'n5' : table.iloc[4]['t_num'],
+            
+            'product1' : table.iloc[0]['t_products'],
+            'product2' : table.iloc[1]['t_products'],
+            'product3' : table.iloc[2]['t_products'],
+            'product4' : table.iloc[3]['t_products'],
+            'product5' : table.iloc[4]['t_products'],
+            
+            'kol1' : table.iloc[0]['t_kol'],
+            'kol2' : table.iloc[1]['t_kol'],
+            'kol3' : table.iloc[2]['t_kol'],
+            'kol4' : table.iloc[3]['t_kol'],
+            'kol5' : table.iloc[4]['t_kol'],
+            
+            'ed1' : table.iloc[0]['t_ed'],
+            'ed2' : table.iloc[1]['t_ed'],
+            'ed3' : table.iloc[2]['t_ed'],
+            'ed4' : table.iloc[3]['t_ed'],
+            'ed5' : table.iloc[4]['t_ed'],
 
-        'nds1' : table.iloc[0]['t_nds'],
-        'nds2' : table.iloc[1]['t_nds'],
-        'nds3' : table.iloc[2]['t_nds'],
-        'nds4' : table.iloc[3]['t_nds'],
-        'nds5' : table.iloc[4]['t_nds'],
-        
-        'price1' : table.iloc[0]['t_price'],
-        'price2' : table.iloc[1]['t_price'],
-        'price3' : table.iloc[2]['t_price'],
-        'price4' : table.iloc[3]['t_price'],
-        'price5' : table.iloc[4]['t_price'],
-        
-        'summ1' : table.iloc[0]['t_sum'],
-        'summ2' : table.iloc[1]['t_sum'],
-        'summ3' : table.iloc[2]['t_sum'],
-        'summ4' : table.iloc[3]['t_sum'],
-        'summ5' : table.iloc[4]['t_sum'],
+            'nds1' : table.iloc[0]['t_nds'],
+            'nds2' : table.iloc[1]['t_nds'],
+            'nds3' : table.iloc[2]['t_nds'],
+            'nds4' : table.iloc[3]['t_nds'],
+            'nds5' : table.iloc[4]['t_nds'],
+            
+            'price1' : table.iloc[0]['t_price'],
+            'price2' : table.iloc[1]['t_price'],
+            'price3' : table.iloc[2]['t_price'],
+            'price4' : table.iloc[3]['t_price'],
+            'price5' : table.iloc[4]['t_price'],
+            
+            'summ1' : table.iloc[0]['t_sum'],
+            'summ2' : table.iloc[1]['t_sum'],
+            'summ3' : table.iloc[2]['t_sum'],
+            'summ4' : table.iloc[3]['t_sum'],
+            'summ5' : table.iloc[4]['t_sum'],
 
-        'var17' : nds_4,
-        'var18' : summa_str,
-        'var19' : num2words(int(summa), lang='ru')
-        }
-    doc.render(context)
-    doc.save("doc_1_"+key+".docx")
+            'var17' : nds_4,
+            'var18' : summa_str,
+            'var19' : num2words(int(summa), lang='ru')
+            }
+        doc.render(context)
+        doc.save("doc_1_"+key+".docx")
 
     ##Акт о проделанных работах
     #_____________________________________________________
-    doc = DocxTemplate("tpl_invoice_2.docx")
-    context = {
-        'var2' : provider_inn,
-        'var3' : provider_kpp,
-        'var4' : provider_name,
-        'var8' : num['number'],
-        'var9' : datetime.datetime.today().strftime("%d.%m.%Y"),
-        'var10' : provider_address,
-        'var11' : data['value'],
-        'var12' : data['data']['inn'],
-        'var13' : data['data']['kpp'],
-        'var14' : data['data']['address']['value'],
-        'var15' : nds_3,
-        
-        'n1' : table.iloc[0]['t_num'],
-        'n2' : table.iloc[1]['t_num'],
-        'n3' : table.iloc[2]['t_num'],
-        'n4' : table.iloc[3]['t_num'],
-        'n5' : table.iloc[4]['t_num'],
-        
-        'product1' : table.iloc[0]['t_products'],
-        'product2' : table.iloc[1]['t_products'],
-        'product3' : table.iloc[2]['t_products'],
-        'product4' : table.iloc[3]['t_products'],
-        'product5' : table.iloc[4]['t_products'],
-        
-        'kol1' : table.iloc[0]['t_kol'],
-        'kol2' : table.iloc[1]['t_kol'],
-        'kol3' : table.iloc[2]['t_kol'],
-        'kol4' : table.iloc[3]['t_kol'],
-        'kol5' : table.iloc[4]['t_kol'],
-        
-        'ed1' : table.iloc[0]['t_ed'],
-        'ed2' : table.iloc[1]['t_ed'],
-        'ed3' : table.iloc[2]['t_ed'],
-        'ed4' : table.iloc[3]['t_ed'],
-        'ed5' : table.iloc[4]['t_ed'],
+    def write_act():
+        doc = DocxTemplate("tpl_invoice_2.docx")
+        context = {
+            'var2' : provider_inn,
+            'var3' : provider_kpp,
+            'var4' : provider_name,
+            'var8' : num['number'],
+            'var9' : datetime.datetime.today().strftime("%d.%m.%Y"),
+            'var10' : provider_address,
+            'var11' : data['value'],
+            'var12' : data['data']['inn'],
+            'var13' : data['data']['kpp'],
+            'var14' : data['data']['address']['value'],
+            'var15' : nds_3,
+            
+            'n1' : table.iloc[0]['t_num'],
+            'n2' : table.iloc[1]['t_num'],
+            'n3' : table.iloc[2]['t_num'],
+            'n4' : table.iloc[3]['t_num'],
+            'n5' : table.iloc[4]['t_num'],
+            
+            'product1' : table.iloc[0]['t_products'],
+            'product2' : table.iloc[1]['t_products'],
+            'product3' : table.iloc[2]['t_products'],
+            'product4' : table.iloc[3]['t_products'],
+            'product5' : table.iloc[4]['t_products'],
+            
+            'kol1' : table.iloc[0]['t_kol'],
+            'kol2' : table.iloc[1]['t_kol'],
+            'kol3' : table.iloc[2]['t_kol'],
+            'kol4' : table.iloc[3]['t_kol'],
+            'kol5' : table.iloc[4]['t_kol'],
+            
+            'ed1' : table.iloc[0]['t_ed'],
+            'ed2' : table.iloc[1]['t_ed'],
+            'ed3' : table.iloc[2]['t_ed'],
+            'ed4' : table.iloc[3]['t_ed'],
+            'ed5' : table.iloc[4]['t_ed'],
 
-        'nds1' : table.iloc[0]['t_nds'],
-        'nds2' : table.iloc[1]['t_nds'],
-        'nds3' : table.iloc[2]['t_nds'],
-        'nds4' : table.iloc[3]['t_nds'],
-        'nds5' : table.iloc[4]['t_nds'],
-        
-        'price1' : table.iloc[0]['t_price'],
-        'price2' : table.iloc[1]['t_price'],
-        'price3' : table.iloc[2]['t_price'],
-        'price4' : table.iloc[3]['t_price'],
-        'price5' : table.iloc[4]['t_price'],
-        
-        'summ1' : table.iloc[0]['t_sum'],
-        'summ2' : table.iloc[1]['t_sum'],
-        'summ3' : table.iloc[2]['t_sum'],
-        'summ4' : table.iloc[3]['t_sum'],
-        'summ5' : table.iloc[4]['t_sum'],
+            'nds1' : table.iloc[0]['t_nds'],
+            'nds2' : table.iloc[1]['t_nds'],
+            'nds3' : table.iloc[2]['t_nds'],
+            'nds4' : table.iloc[3]['t_nds'],
+            'nds5' : table.iloc[4]['t_nds'],
+            
+            'price1' : table.iloc[0]['t_price'],
+            'price2' : table.iloc[1]['t_price'],
+            'price3' : table.iloc[2]['t_price'],
+            'price4' : table.iloc[3]['t_price'],
+            'price5' : table.iloc[4]['t_price'],
+            
+            'summ1' : table.iloc[0]['t_sum'],
+            'summ2' : table.iloc[1]['t_sum'],
+            'summ3' : table.iloc[2]['t_sum'],
+            'summ4' : table.iloc[3]['t_sum'],
+            'summ5' : table.iloc[4]['t_sum'],
 
-        'var17' : nds_4,
-        'var18' : summa_str,
-        'var19' : num2words(int(summa), lang='ru')
-        }
-    doc.render(context)
-    doc.save("doc_2_"+key+".docx")
+            'var17' : nds_4,
+            'var18' : summa_str,
+            'var19' : num2words(int(summa), lang='ru')
+            }
+        doc.render(context)
+        doc.save("doc_2_"+key+".docx")
 
     ##Договор о предоставлении услуг
     #_____________________________________________________
-    doc = DocxTemplate("tpl_invoice_3.docx")
-    context = {
-        'var1' : provider_bank,
-        'var2' : provider_inn,
-        'var3' : provider_kpp,
-        'var4' : provider_name,
-        'var5' : provider_bik,
-        'var6' : provider_account1,
-        'var7' : provider_account2,
-        'var8' : num['number'],
-        'var9' : datetime.datetime.today().strftime("%d.%m.%Y"),
-        'var10' : provider_address,
-        'var11' : data['value'],
-        'var12' : data['data']['inn'],
-        'var13' : data['data']['kpp'],
-        'var14' : data['data']['address']['value'],
-        
-        'n1' : table.iloc[0]['t_num'],
-        'n2' : table.iloc[1]['t_num'],
-        'n3' : table.iloc[2]['t_num'],
-        'n4' : table.iloc[3]['t_num'],
-        'n5' : table.iloc[4]['t_num'],
-        
-        'product1' : table.iloc[0]['t_products'],
-        'product2' : table.iloc[1]['t_products'],
-        'product3' : table.iloc[2]['t_products'],
-        'product4' : table.iloc[3]['t_products'],
-        'product5' : table.iloc[4]['t_products'],
-        
-        'kol1' : table.iloc[0]['t_kol'],
-        'kol2' : table.iloc[1]['t_kol'],
-        'kol3' : table.iloc[2]['t_kol'],
-        'kol4' : table.iloc[3]['t_kol'],
-        'kol5' : table.iloc[4]['t_kol'],
-        
-        'ed1' : table.iloc[0]['t_ed'],
-        'ed2' : table.iloc[1]['t_ed'],
-        'ed3' : table.iloc[2]['t_ed'],
-        'ed4' : table.iloc[3]['t_ed'],
-        'ed5' : table.iloc[4]['t_ed'],
+    def write_contract():
+        doc = DocxTemplate("tpl_invoice_3.docx")
+        context = {
+            'var1' : provider_bank,
+            'var2' : provider_inn,
+            'var3' : provider_kpp,
+            'var4' : provider_name,
+            'var5' : provider_bik,
+            'var6' : provider_account1,
+            'var7' : provider_account2,
+            'var8' : num['number'],
+            'var9' : datetime.datetime.today().strftime("%d.%m.%Y"),
+            'var10' : provider_address,
+            'var11' : data['value'],
+            'var12' : data['data']['inn'],
+            'var13' : data['data']['kpp'],
+            'var14' : data['data']['address']['value'],
+            
+            'n1' : table.iloc[0]['t_num'],
+            'n2' : table.iloc[1]['t_num'],
+            'n3' : table.iloc[2]['t_num'],
+            'n4' : table.iloc[3]['t_num'],
+            'n5' : table.iloc[4]['t_num'],
+            
+            'product1' : table.iloc[0]['t_products'],
+            'product2' : table.iloc[1]['t_products'],
+            'product3' : table.iloc[2]['t_products'],
+            'product4' : table.iloc[3]['t_products'],
+            'product5' : table.iloc[4]['t_products'],
+            
+            'kol1' : table.iloc[0]['t_kol'],
+            'kol2' : table.iloc[1]['t_kol'],
+            'kol3' : table.iloc[2]['t_kol'],
+            'kol4' : table.iloc[3]['t_kol'],
+            'kol5' : table.iloc[4]['t_kol'],
+            
+            'ed1' : table.iloc[0]['t_ed'],
+            'ed2' : table.iloc[1]['t_ed'],
+            'ed3' : table.iloc[2]['t_ed'],
+            'ed4' : table.iloc[3]['t_ed'],
+            'ed5' : table.iloc[4]['t_ed'],
 
-        'nds1' : table.iloc[0]['t_nds'],
-        'nds2' : table.iloc[1]['t_nds'],
-        'nds3' : table.iloc[2]['t_nds'],
-        'nds4' : table.iloc[3]['t_nds'],
-        'nds5' : table.iloc[4]['t_nds'],
-        
-        'price1' : table.iloc[0]['t_price'],
-        'price2' : table.iloc[1]['t_price'],
-        'price3' : table.iloc[2]['t_price'],
-        'price4' : table.iloc[3]['t_price'],
-        'price5' : table.iloc[4]['t_price'],
-        
-        'summ1' : table.iloc[0]['t_sum'],
-        'summ2' : table.iloc[1]['t_sum'],
-        'summ3' : table.iloc[2]['t_sum'],
-        'summ4' : table.iloc[3]['t_sum'],
-        'summ5' : table.iloc[4]['t_sum'],
+            'nds1' : table.iloc[0]['t_nds'],
+            'nds2' : table.iloc[1]['t_nds'],
+            'nds3' : table.iloc[2]['t_nds'],
+            'nds4' : table.iloc[3]['t_nds'],
+            'nds5' : table.iloc[4]['t_nds'],
+            
+            'price1' : table.iloc[0]['t_price'],
+            'price2' : table.iloc[1]['t_price'],
+            'price3' : table.iloc[2]['t_price'],
+            'price4' : table.iloc[3]['t_price'],
+            'price5' : table.iloc[4]['t_price'],
+            
+            'summ1' : table.iloc[0]['t_sum'],
+            'summ2' : table.iloc[1]['t_sum'],
+            'summ3' : table.iloc[2]['t_sum'],
+            'summ4' : table.iloc[3]['t_sum'],
+            'summ5' : table.iloc[4]['t_sum'],
 
-        'var18' : summa_str,
-        'var19' : num2words(int(summa), lang='ru'),
-        
-        'var20' : data['data']['ogrn'],
-        'var21' : provider_ogrn,
-        'var22' : nds_5,
-        'var23' : nds_6
-        }
-    doc.render(context)
-    doc.save("doc_3_"+key+".docx")
+            'var18' : summa_str,
+            'var19' : num2words(int(summa), lang='ru'),
+            
+            'var20' : data['data']['ogrn'],
+            'var21' : provider_ogrn,
+            'var22' : nds_5,
+            'var23' : nds_6
+            }
+        doc.render(context)
+        doc.save("doc_3_"+key+".docx")
     
     ##Договор о предоставлении услуг(Ростелеком)
     #_____________________________________________________
-    doc = DocxTemplate("tpl_invoice_4.docx")
-    context = {
-        'var0' : datetime.datetime.today().strftime("%d.%m.%Y"),
-        'var1' : data['data']['name']['full_with_opf'],
-        'var2' : data['data']['address']['data']["city_with_type"],
-        'var3' : data['data']['management']['name'].split()[0],
-        'var4' : data['data']['management']['name'].split()[1],
-        'var5' : data['data']['management']['name'].split()[2],
-        'var6' : data['data']['address']['data']['postal_code'],
-        'var7' : data['data']['address']['data']['region'],
-        'var8' : data['data']['address']['data']['city_district'],
-        'var9' : data['data']['address']['data']['city'],
-        'var10' : data['data']['address']['data']['street_with_type'],
-        'var11' : data['data']['address']['data']['house'],
-        'var12' : data['data']['address']['value'],
-        'var13' : data['data']['ogrn'],
-        'var14' : data['data']['inn'],
-        'var15' : data['data']['kpp'],
-        'var16' : data['data']['okpo'],
-        'var17' : data['data']['management']['name'],
-        'var18' : product_title,
-        'var19' : num['number'],
-       # 'var20' : data
-#
-#
-#
-       # 'var1' : provider_bank,
-       # 'var2' : provider_inn,
-       # 'var3' : provider_kpp,
-       # 'var4' : provider_name,
-       # 'var5' : provider_bik,
-       # 'var6' : provider_account1,
-       # 'var7' : provider_account2,
-       # 'var8' : num['number'],
-       # 'var9' : datetime.datetime.today().strftime("%d.%m.%Y"),
-       # 'var10' : provider_address,
-       # 'var11' : data['value'],
-       # 'var12' : data['data']['inn'],
-       # 'var13' : data['data']['kpp'],
-       # 'var14' : data['data']['address']['value'],
-       # 
-       # 'n1' : table.iloc[0]['t_num'],
-       # 'n2' : table.iloc[1]['t_num'],
-       # 'n3' : table.iloc[2]['t_num'],
-       # 'n4' : table.iloc[3]['t_num'],
-       # 'n5' : table.iloc[4]['t_num'],
-       # 
-        'product1' : table.iloc[0]['t_products'],
-        'product2' : table.iloc[1]['t_products'],
-        'product3' : table.iloc[2]['t_products'],
-        'product4' : table.iloc[3]['t_products'],
-        'product5' : table.iloc[4]['t_products'],
-       # 
-        'kol1' : table.iloc[0]['t_kol'],
-        'kol2' : table.iloc[1]['t_kol'],
-        'kol3' : table.iloc[2]['t_kol'],
-        'kol4' : table.iloc[3]['t_kol'],
-        'kol5' : table.iloc[4]['t_kol'],
-       # 
-        'ed1' : table.iloc[0]['t_ed'],
-        'ed2' : table.iloc[1]['t_ed'],
-        'ed3' : table.iloc[2]['t_ed'],
-        'ed4' : table.iloc[3]['t_ed'],
-        'ed5' : table.iloc[4]['t_ed'],
-#
-       # 'nds1' : table.iloc[0]['t_nds'],
-       # 'nds2' : table.iloc[1]['t_nds'],
-       # 'nds3' : table.iloc[2]['t_nds'],
-       # 'nds4' : table.iloc[3]['t_nds'],
-       # 'nds5' : table.iloc[4]['t_nds'],
-       # 
-       # 'price1' : table.iloc[0]['t_price'],
-       # 'price2' : table.iloc[1]['t_price'],
-       # 'price3' : table.iloc[2]['t_price'],
-       # 'price4' : table.iloc[3]['t_price'],
-       # 'price5' : table.iloc[4]['t_price'],
-       # 
-        'summ1' : table.iloc[0]['t_sum'],
-        'summ2' : table.iloc[1]['t_sum'],
-        'summ3' : table.iloc[2]['t_sum'],
-        'summ4' : table.iloc[3]['t_sum'],
-        'summ5' : table.iloc[4]['t_sum']
-#
-       # 'var18' : summa_str,
-       # 'var19' : num2words(int(summa), lang='ru'),
-       # 
-       # 'var20' : data['data']['ogrn'],
-       # 'var21' : provider_ogrn,
-       # 'var22' : nds_5,
-       # 'var23' : nds_6
-        }
-    doc.render(context)
-    doc.save("doc_4_"+key+".docx")
+    def write_contract_RT():
+        doc = DocxTemplate("tpl_invoice_4.docx")
+        context = {
+            'var0' : datetime.datetime.today().strftime("%d.%m.%Y"),
+            'var1' : data['data']['name']['full_with_opf'],
+            'var2' : data['data']['address']['data']["city_with_type"],
+            'var3' : data['data']['management']['name'].split()[0],
+            'var4' : data['data']['management']['name'].split()[1],
+            'var5' : data['data']['management']['name'].split()[2],
+            'var6' : data['data']['address']['data']['postal_code'],
+            'var7' : data['data']['address']['data']['region'],
+            'var8' : data['data']['address']['data']['city_district'],
+            'var9' : data['data']['address']['data']['city'],
+            'var10' : data['data']['address']['data']['street_with_type'],
+            'var11' : data['data']['address']['data']['house'],
+            'var12' : data['data']['address']['value'],
+            'var13' : data['data']['ogrn'],
+            'var14' : data['data']['inn'],
+            'var15' : data['data']['kpp'],
+            'var16' : data['data']['okpo'],
+            'var17' : data['data']['management']['name'],
+            'var18' : product_name,
+            'var19' : num['number'],
+            'var20' : tariff_name,
+            'var21' : tariff_users_count,
+            'var22' : tariff_phone_numbers_count,
+            'var23' : payment_frequency,
 
+            'product1' : table.iloc[0]['t_products'],
+            'product2' : table.iloc[1]['t_products'],
+            'product3' : table.iloc[2]['t_products'],
+            'product4' : table.iloc[3]['t_products'],
+            'product5' : table.iloc[4]['t_products'],
+            
+            'kol1' : table.iloc[0]['t_kol'],
+            'kol2' : table.iloc[1]['t_kol'],
+            'kol3' : table.iloc[2]['t_kol'],
+            'kol4' : table.iloc[3]['t_kol'],
+            'kol5' : table.iloc[4]['t_kol'],
+            
+            'ed1' : table.iloc[0]['t_ed'],
+            'ed2' : table.iloc[1]['t_ed'],
+            'ed3' : table.iloc[2]['t_ed'],
+            'ed4' : table.iloc[3]['t_ed'],
+            'ed5' : table.iloc[4]['t_ed'],
+
+            'summ1' : table.iloc[0]['t_sum'],
+            'summ2' : table.iloc[1]['t_sum'],
+            'summ3' : table.iloc[2]['t_sum'],
+            'summ4' : table.iloc[3]['t_sum'],
+            'summ5' : table.iloc[4]['t_sum']
+
+            }
+        doc.render(context)
+        doc.save("doc_4_"+key+".docx")
+
+
+    ##Условия для создания шаблонов
+    #_____________________________________________________
+    if template_code == 'vpbx':
+        write_contract_RT()
+        responseJson = {"contractRT_url": "/getfile/doc_4_"+key+".docx"}
+    else:
+        responseJson = {"contract_url": "/getfile/doc_3_"+key+".docx","act_url": "/getfile/doc_2_"+key+".docx","invoice_url": "/getfile/doc_1_"+key+".docx"}
+        write_invoice()
+        write_act()
+        write_contract()
     #Запись в историю
     #with open('history.json', 'r',encoding='utf-8') as fh: #открываем файл с данными о исполнителях на чтение
     #    history = json.load(fh)
@@ -448,7 +428,7 @@ def main3(provider_inn):
         json.dump(num, write_file)
 
     #Формируем ответ    
-    responseJson = {"contractRT_url": "/getfile/doc_4_"+key+".docx","contract_url": "/getfile/doc_3_"+key+".docx","act_url": "/getfile/doc_2_"+key+".docx","invoice_url": "/getfile/doc_1_"+key+".docx"}
+    #responseJson = {"contractRT_url": "/getfile/doc_4_"+key+".docx","contract_url": "/getfile/doc_3_"+key+".docx","act_url": "/getfile/doc_2_"+key+".docx","invoice_url": "/getfile/doc_1_"+key+".docx"}
     return jsonify(responseJson)
 
 #Точка входа для скачивания файлов
