@@ -4,6 +4,9 @@ from docxtpl import DocxTemplate
 from num2words import num2words   
 import innApi_v2, datetime, uuid
 import pandas as pd
+
+
+
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 
@@ -88,6 +91,23 @@ def main3(provider_inn):
     tariff_users_count = data_post['payload']['tariff_users_count']
     tariff_phone_numbers_count = data_post['payload']['tariff_phone_numbers_count']
     payment_frequency = data_post['payload']['payment_frequency']
+    tariff_notincluded_users_count = data_post['payload']['tariff_notincluded_users_count']
+    tariff_included_minuts_count = data_post['payload']['tariff_included_minuts_count']
+    tariff_abonent_number_abc = data_post['payload']['tariff_abonent_number_abc']
+    tariff_abonent_number_8800 = data_post['payload']['tariff_abonent_number_8800']
+    tariff_abonent_number_category_abc = data_post['payload']['tariff_abonent_number_category_abc']
+    tariff_user_hardware_type = data_post['payload']['tariff_user_hardware_type']
+    tariff_payment_access = data_post['payload']['tariff_payment_access']
+    tariff_payment_on_number_category_access = data_post['payload']['tariff_payment_on_number_category_access']
+    tariff_period_of_access = data_post['payload']['tariff_period_of_access']
+    tariff_users_count_for_record = data_post['payload']['tariff_users_count_for_record']
+    tariff_virtual_center_count = data_post['payload']['tariff_virtual_center_count']
+    tariff_operator_count = data_post['payload']['tariff_operator_count']
+    tariff_organization_call_forwarding_in_8800 = data_post['payload']['tariff_organization_call_forwarding_in_8800']
+    tariff_hardware_transfer = data_post['payload']['tariff_hardware_transfer']
+    tariff_abonent_hardware_interface = data_post['payload']['tariff_abonent_hardware_interface']
+
+
 
     #Получаем данные от DaData
     data,key = innApi_v2.mainn(client_inn)
@@ -103,10 +123,10 @@ def main3(provider_inn):
             str(data_post['payload']['invoice'][i]['quantity']),
             data_post['payload']['invoice'][i]['unit'],
             nds_2,
-            '{0:.2f}'.format(data_post['payload']['invoice'][i]['cost']),
-            '{0:.2f}'.format((data_post['payload']['invoice'][i]['quantity'] * data_post['payload']['invoice'][i]['cost'])),
+            '{0:.2f}'.format(int(data_post['payload']['invoice'][i]['cost'])),
+            '{0:.2f}'.format(int(data_post['payload']['invoice'][i]['quantity']) * int(data_post['payload']['invoice'][i]['cost'])),
             payment_frequency]
-        summa = summa + (data_post['payload']['invoice'][i]['quantity'] * data_post['payload']['invoice'][i]['cost'])
+        summa = summa + (int(data_post['payload']['invoice'][i]['quantity']) * int(data_post['payload']['invoice'][i]['cost']))
     
     #Общая стоимость заказа
     if provider_nds == 1:
@@ -371,6 +391,21 @@ def main3(provider_inn):
             'var20' : tariff_name,
             'var21' : tariff_users_count,
             'var22' : tariff_phone_numbers_count,
+            'var23' : tariff_notincluded_users_count,
+            'var24' : tariff_included_minuts_count,
+            'var25' : tariff_abonent_number_abc,
+            'var26' : tariff_abonent_number_8800,
+            'var27' : tariff_abonent_number_category_abc,
+            'var28' : tariff_user_hardware_type,
+            'var29' : tariff_payment_access,
+            'var30' : tariff_payment_on_number_category_access,
+            'var31' : tariff_period_of_access,
+            'var32' : tariff_users_count_for_record,
+            'var33' : tariff_virtual_center_count,
+            'var34' : tariff_operator_count,
+            'var35' : tariff_organization_call_forwarding_in_8800,
+            'var36' : tariff_hardware_transfer,
+            'var37' : tariff_abonent_hardware_interface,
 
             'product1' : table.iloc[0]['t_products'],
             'product2' : table.iloc[1]['t_products'],
@@ -447,6 +482,11 @@ def main3(provider_inn):
 @app.route('/getfile/<name>')
 def get_output_file(name):
     return send_file(name, as_attachment=True)
+
+@app.route('/api/companies/<inn>')
+def get_data_about_company(inn):
+    data,key = innApi_v2.mainn(inn)
+    return jsonify(data)
 
 #@app.route('/api/companies/<int:provider_inn>/documents', methods=['GET'])
 #def get_documents(provider_inn):
