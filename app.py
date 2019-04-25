@@ -6,7 +6,6 @@ import innApi_v2, datetime, uuid
 import pandas as pd
 
 
-
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 
@@ -103,10 +102,74 @@ def main3(provider_inn):
     tariff_users_count_for_record = data_post['payload']['tariff_users_count_for_record']
     tariff_virtual_center_count = data_post['payload']['tariff_virtual_center_count']
     tariff_operator_count = data_post['payload']['tariff_operator_count']
+    #чекбоксы
     tariff_organization_call_forwarding_in_8800 = data_post['payload']['tariff_organization_call_forwarding_in_8800']
     tariff_hardware_transfer = data_post['payload']['tariff_hardware_transfer']
     tariff_abonent_hardware_interface = data_post['payload']['tariff_abonent_hardware_interface']
+    invoice_address_delivery = data_post['payload']['invoice_address_delivery']
+    information_about_caller_using = data_post['payload']['information_about_caller_using']
+    contract_period = data_post['payload']['contract_period']
+    advert_getting = data_post['payload']['advert_getting']
 
+    
+
+    tariff_organization_call_forwarding_in_8800_1 = ''
+    tariff_hardware_transfer_1 = ''
+    tariff_hardware_transfer_2 = ''
+    tariff_hardware_transfer_3 = ''
+    tariff_hardware_transfer_4 = ''
+    tariff_hardware_transfer_5 = ''
+    tariff_abonent_hardware_interface_1 = ''
+    tariff_abonent_hardware_interface_2 = ''
+    invoice_address_delivery_1 = ''
+    invoice_address_delivery_2 = ''
+    invoice_address_delivery_3 = ''
+    invoice_address_delivery_4 = ''
+    information_about_caller_using_1 = ''
+    information_about_caller_using_2 = ''
+    contract_period_1 = ''
+    contract_period_2 = ''
+    advert_getting_1 = ''
+    if tariff_organization_call_forwarding_in_8800 == '1':
+        tariff_organization_call_forwarding_in_8800_1 = 'Х'
+
+    if tariff_hardware_transfer == '1':
+        tariff_hardware_transfer_1 = 'Х'
+    elif tariff_hardware_transfer == '2':
+        tariff_hardware_transfer_2 = 'Х'
+    elif tariff_hardware_transfer == '3':
+        tariff_hardware_transfer_3 = 'Х'
+    elif tariff_hardware_transfer == '4':
+        tariff_hardware_transfer_4 = 'Х'
+    elif tariff_hardware_transfer == '5':
+        tariff_hardware_transfer_5 = 'Х'
+
+    if tariff_abonent_hardware_interface == '1':
+        tariff_abonent_hardware_interface_1 = 'Х'
+    elif tariff_abonent_hardware_interface == '2':
+        tariff_abonent_hardware_interface_2 = 'X'
+
+    if invoice_address_delivery == '1':
+        invoice_address_delivery_1 = 'Х'
+    elif invoice_address_delivery == '2':
+        invoice_address_delivery_2 = 'Х'
+    elif invoice_address_delivery == '3':
+        invoice_address_delivery_3 = 'Х'
+    elif invoice_address_delivery == '4':
+        invoice_address_delivery_4 = 'Х'
+
+    if information_about_caller_using == '1':
+        information_about_caller_using_1 = 'Х'
+    elif information_about_caller_using == '2':
+        information_about_caller_using_2 = 'Х'
+
+    if contract_period == '1':
+        contract_period_1 = 'Х'
+    elif contract_period == '2':
+        contract_period_2 = 'Х'
+
+    if advert_getting == '1':
+        advert_getting_1 = 'Х'
 
 
     #Получаем данные от DaData
@@ -149,6 +212,7 @@ def main3(provider_inn):
     #Дополнительное КПП клиента
     if client_kpp == '':
         client_kpp = data['data']['kpp']
+
 
 
     #Генерация документов
@@ -403,9 +467,24 @@ def main3(provider_inn):
             'var32' : tariff_users_count_for_record,
             'var33' : tariff_virtual_center_count,
             'var34' : tariff_operator_count,
-            'var35' : tariff_organization_call_forwarding_in_8800,
-            'var36' : tariff_hardware_transfer,
-            'var37' : tariff_abonent_hardware_interface,
+            #заполняем чекбоксы
+            'var35_1' : tariff_organization_call_forwarding_in_8800_1,
+            'var36_1' : tariff_hardware_transfer_1,
+            'var36_2' : tariff_hardware_transfer_2,
+            'var36_3' : tariff_hardware_transfer_3,
+            'var36_4' : tariff_hardware_transfer_4,
+            'var36_5' : tariff_hardware_transfer_5,
+            'var37_1' : tariff_abonent_hardware_interface_1,
+            'var37_2' : tariff_abonent_hardware_interface_2,
+            'var38_1' : invoice_address_delivery_1,
+            'var38_2' : invoice_address_delivery_2,
+            'var38_3' : invoice_address_delivery_3,
+            'var38_4' : invoice_address_delivery_4,
+            'var39_1' : information_about_caller_using_1,
+            'var39_2' : information_about_caller_using_2,
+            'var40_1' : contract_period_1,
+            'var40_2' : contract_period_2,
+            'var41_1' : advert_getting_1,
 
             'product1' : table.iloc[0]['t_products'],
             'product2' : table.iloc[1]['t_products'],
@@ -498,4 +577,4 @@ def get_data_about_company(inn):
 
 if __name__ == '__main__':
 
-    app.run(debug=False,host='0.0.0.0', port=5000)
+    app.run(debug=False,threaded = True, host='0.0.0.0', port=5000)
