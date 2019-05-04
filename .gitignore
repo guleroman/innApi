@@ -3,5 +3,4 @@ __pycache__/
 .ipynb_checkpoints/
 *.ipynb
 .vscode/
-afterResponse.py 
-app_2.py
+afterResponse.py
