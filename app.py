@@ -1,19 +1,19 @@
 #!flask/bin/python
-from flask import Flask, jsonify, request, json, send_file
+from flask import Flask, jsonify, request, json
 from docxtpl import DocxTemplate
 from num2words import num2words   
-import innApi_v2, datetime, uuid
+import innApi_v2, datetime
 import pandas as pd
-
+import time
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 
-
 @app.route('/api/companies/<int:provider_inn>/documents', methods=['POST'])
 def main3(provider_inn):
+    start_time = time.time()
     provider_inn = str(provider_inn)
-
+    key = request.headers.get('key')
     with open('company.json', 'r', encoding='utf-8') as fh: #открываем файл с данными о исполнителях на чтение
         company = json.load(fh)
 
@@ -85,31 +85,30 @@ def main3(provider_inn):
     client_inn = data_post['client_inn'] # инн - заказчика
     client_kpp = data_post['client_kpp']
     template_code = data_post['template_code']
-    product_name = data_post['payload']['product_name']
-    tariff_name = data_post['payload']['tariff_name']
-    tariff_users_count = data_post['payload']['tariff_users_count']
-    tariff_phone_numbers_count = data_post['payload']['tariff_phone_numbers_count']
-    payment_frequency = data_post['payload']['payment_frequency']
-    tariff_notincluded_users_count = data_post['payload']['tariff_notincluded_users_count']
-    tariff_included_minuts_count = data_post['payload']['tariff_included_minuts_count']
-    tariff_abonent_number_abc = data_post['payload']['tariff_abonent_number_abc']
-    tariff_abonent_number_8800 = data_post['payload']['tariff_abonent_number_8800']
-    tariff_abonent_number_category_abc = data_post['payload']['tariff_abonent_number_category_abc']
-    tariff_user_hardware_type = data_post['payload']['tariff_user_hardware_type']
-    tariff_payment_access = data_post['payload']['tariff_payment_access']
-    tariff_payment_on_number_category_access = data_post['payload']['tariff_payment_on_number_category_access']
-    tariff_period_of_access = data_post['payload']['tariff_period_of_access']
-    tariff_users_count_for_record = data_post['payload']['tariff_users_count_for_record']
-    tariff_virtual_center_count = data_post['payload']['tariff_virtual_center_count']
-    tariff_operator_count = data_post['payload']['tariff_operator_count']
+    product_name = data_post['product_name']
+    tariff_name = data_post['tariff_name']
+    tariff_users_count = str(data_post['tariff_users_count'])
+    payment_frequency = data_post['payment_frequency']
+    tariff_notincluded_users_count = str(data_post['tariff_notincluded_users_count'])
+    tariff_included_minuts_count = str(data_post['tariff_included_minuts_count'])
+    tariff_abonent_number_abc = data_post['tariff_abonent_number_abc']
+    tariff_abonent_number_8800 = data_post['tariff_abonent_number_8800']
+    tariff_abonent_number_category_abc = data_post['tariff_abonent_number_category_abc']
+    tariff_user_hardware_type = data_post['tariff_user_hardware_type']
+    tariff_payment_access = data_post['tariff_payment_access']
+    tariff_payment_on_number_category_access = data_post['tariff_payment_on_number_category_access']
+    tariff_period_of_access = data_post['tariff_period_of_access']
+    tariff_users_count_for_record = data_post['tariff_users_count_for_record']
+    tariff_virtual_center_count = data_post['tariff_virtual_center_count']
+    tariff_operator_count = data_post['tariff_operator_count']
     #чекбоксы
-    tariff_organization_call_forwarding_in_8800 = data_post['payload']['tariff_organization_call_forwarding_in_8800']
-    tariff_hardware_transfer = data_post['payload']['tariff_hardware_transfer']
-    tariff_abonent_hardware_interface = data_post['payload']['tariff_abonent_hardware_interface']
-    invoice_address_delivery = data_post['payload']['invoice_address_delivery']
-    information_about_caller_using = data_post['payload']['information_about_caller_using']
-    contract_period = data_post['payload']['contract_period']
-    advert_getting = data_post['payload']['advert_getting']
+    tariff_organization_call_forwarding_in_8800 = data_post['tariff_organization_call_forwarding_in_8800']
+    tariff_hardware_transfer = data_post['tariff_hardware_transfer']
+    tariff_abonent_hardware_interface = data_post['tariff_abonent_hardware_interface']
+    invoice_address_delivery = data_post['invoice_address_delivery']
+    information_about_caller_using = data_post['information_about_caller_using']
+    contract_period = data_post['contract_period']
+    advert_getting = data_post['advert_getting']
 
     
 
@@ -130,66 +129,66 @@ def main3(provider_inn):
     contract_period_1 = ''
     contract_period_2 = ''
     advert_getting_1 = ''
-    if tariff_organization_call_forwarding_in_8800 == '1':
+    if tariff_organization_call_forwarding_in_8800 is True:
         tariff_organization_call_forwarding_in_8800_1 = 'Х'
 
-    if tariff_hardware_transfer == '1':
+    if tariff_hardware_transfer == 1:
         tariff_hardware_transfer_1 = 'Х'
-    elif tariff_hardware_transfer == '2':
+    elif tariff_hardware_transfer == 2:
         tariff_hardware_transfer_2 = 'Х'
-    elif tariff_hardware_transfer == '3':
+    elif tariff_hardware_transfer == 3:
         tariff_hardware_transfer_3 = 'Х'
-    elif tariff_hardware_transfer == '4':
+    elif tariff_hardware_transfer == 4:
         tariff_hardware_transfer_4 = 'Х'
-    elif tariff_hardware_transfer == '5':
+    elif tariff_hardware_transfer == 5:
         tariff_hardware_transfer_5 = 'Х'
 
-    if tariff_abonent_hardware_interface == '1':
+    if tariff_abonent_hardware_interface == 1:
         tariff_abonent_hardware_interface_1 = 'Х'
-    elif tariff_abonent_hardware_interface == '2':
+    elif tariff_abonent_hardware_interface == 2:
         tariff_abonent_hardware_interface_2 = 'X'
 
-    if invoice_address_delivery == '1':
+    if invoice_address_delivery == 1:
         invoice_address_delivery_1 = 'Х'
-    elif invoice_address_delivery == '2':
+    elif invoice_address_delivery == 2:
         invoice_address_delivery_2 = 'Х'
-    elif invoice_address_delivery == '3':
+    elif invoice_address_delivery == 3:
         invoice_address_delivery_3 = 'Х'
-    elif invoice_address_delivery == '4':
+    elif invoice_address_delivery == 4:
         invoice_address_delivery_4 = 'Х'
 
-    if information_about_caller_using == '1':
+    if information_about_caller_using is True:
         information_about_caller_using_1 = 'Х'
-    elif information_about_caller_using == '2':
+    elif information_about_caller_using is False:
         information_about_caller_using_2 = 'Х'
 
-    if contract_period == '1':
+    if contract_period == 1:
         contract_period_1 = 'Х'
-    elif contract_period == '2':
+    elif contract_period == 2:
         contract_period_2 = 'Х'
 
-    if advert_getting == '1':
+    if advert_getting is False:
         advert_getting_1 = 'Х'
 
 
     #Получаем данные от DaData
-    data,key = innApi_v2.mainn(client_inn)
+    data = innApi_v2.mainn(client_inn)
 
     #Заполняемм таблицу - товар/цена/стоимость и тд.
     summa = 0
     table = pd.DataFrame({'t_num':[],'t_products':[],'t_kol':[],'t_ed':[],'t_nds':[],'t_price':[],'t_sum':[],'t_payment_frequency':[]})
     table = table[['t_num','t_products','t_kol','t_ed','t_nds','t_price','t_sum','t_payment_frequency']] 
-    for i in range(len(data_post['payload']['invoice'])):
+    for i in range(len(data_post['invoice'])):
         table.loc[len(table)] = [
             str(len(table)+1),
-            data_post['payload']['invoice'][i]['service_name'],
-            str(data_post['payload']['invoice'][i]['quantity']),
-            data_post['payload']['invoice'][i]['unit'],
+            data_post['invoice'][i]['service_name'],
+            str(data_post['invoice'][i]['quantity']),
+            data_post['invoice'][i]['unit'],
             nds_2,
-            '{0:.2f}'.format(int(data_post['payload']['invoice'][i]['cost'])),
-            '{0:.2f}'.format(int(data_post['payload']['invoice'][i]['quantity']) * int(data_post['payload']['invoice'][i]['cost'])),
+            '{0:.2f}'.format(data_post['invoice'][i]['cost']),
+            '{0:.2f}'.format(data_post['invoice'][i]['quantity'] * data_post['invoice'][i]['cost']),
             payment_frequency]
-        summa = summa + (int(data_post['payload']['invoice'][i]['quantity']) * int(data_post['payload']['invoice'][i]['cost']))
+        summa = summa + (data_post['invoice'][i]['quantity'] * data_post['invoice'][i]['cost'])
     
     #Общая стоимость заказа
     if provider_nds == 1:
@@ -454,7 +453,6 @@ def main3(provider_inn):
             'var19' : num['number'],
             'var20' : tariff_name,
             'var21' : tariff_users_count,
-            'var22' : tariff_phone_numbers_count,
             'var23' : tariff_notincluded_users_count,
             'var24' : tariff_included_minuts_count,
             'var25' : tariff_abonent_number_abc,
@@ -525,9 +523,9 @@ def main3(provider_inn):
     #_____________________________________________________
     if template_code == 'vpbx':
         write_contract_RT()
-        responseJson = {"contractRT_url": "/getfile/doc_4_"+key+".docx"}
+        #responseJson = {"contractRT_url": "/getfile/doc_4_"+key+".docx"}
     else:
-        responseJson = {"contract_url": "/getfile/doc_3_"+key+".docx","act_url": "/getfile/doc_2_"+key+".docx","invoice_url": "/getfile/doc_1_"+key+".docx"}
+        #responseJson = {"contract_url": "/getfile/doc_3_"+key+".docx","act_url": "/getfile/doc_2_"+key+".docx","invoice_url": "/getfile/doc_1_"+key+".docx"}
         write_invoice()
         write_act()
         write_contract()
@@ -552,20 +550,10 @@ def main3(provider_inn):
     num['number'] = num['number'] + 1
     with open("iteration.json", "w") as write_file:
         json.dump(num, write_file)
-
+    print("--- %s seconds ---" % (time.time() - start_time))
     #Формируем ответ    
     #responseJson = {"contractRT_url": "/getfile/doc_4_"+key+".docx","contract_url": "/getfile/doc_3_"+key+".docx","act_url": "/getfile/doc_2_"+key+".docx","invoice_url": "/getfile/doc_1_"+key+".docx"}
-    return jsonify(responseJson)
-
-#Точка входа для скачивания файлов
-@app.route('/getfile/<name>')
-def get_output_file(name):
-    return send_file(name, as_attachment=True)
-
-@app.route('/api/companies/<inn>')
-def get_data_about_company(inn):
-    data,key = innApi_v2.mainn(inn)
-    return jsonify(data)
+    return ('ok')
 
 #@app.route('/api/companies/<int:provider_inn>/documents', methods=['GET'])
 #def get_documents(provider_inn):
@@ -577,4 +565,4 @@ def get_data_about_company(inn):
 
 if __name__ == '__main__':
 
-    app.run(debug=False,threaded = True, host='0.0.0.0', port=5000)
+    app.run(debug=False,threaded = True, host='0.0.0.0', port=6060)

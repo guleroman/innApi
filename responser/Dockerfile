@@ -4,6 +4,6 @@ RUN pip3 install --upgrade pip
 #RUN git clone https://github.com/guleroman/innApi.git /API
 #WORKDIR /API
 
-EXPOSE 6060
+EXPOSE 5000
 
-ENTRYPOINT ["python3", "app.py"]
+ENTRYPOINT ["python3", "app_2.py"]
