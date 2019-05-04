@@ -9,12 +9,7 @@ app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 #AfterResponse(app)
 
-@app.route('/getfile/<name>')
-def get_output_file(name):
-    try:
-        return send_file(name, as_attachment=True)
-    except:
-        return make_response(jsonify({"_status_code":404,"error":{"document":"file is not ready yet"}}),404)
+
 
 @app.route('/api/companies/<inn>',methods=['GET'])
 def get_data_about_company(inn):
@@ -363,9 +358,9 @@ def response(prov_inn):
     
     print("Принял - "+key)
     if existing_fields['template_code'] == 'vpbx':
-        responseJson = {"contractRT_url": "/getfile/doc_4_"+key+".docx"}
+        responseJson = {"contractRT_url": "http://176.99.11.61:6060/getfile/doc_4_"+key+".docx"}
     else:
-        responseJson = {"contract_url": "/getfile/doc_3_"+key+".docx","act_url": "/getfile/doc_2_"+key+".docx","invoice_url": "/getfile/doc_1_"+key+".docx"}
+        responseJson = {"contract_url": "http://176.99.11.61:6060/getfile/doc_3_"+key+".docx","act_url": "http://176.99.11.61:6060/getfile/doc_2_"+key+".docx","invoice_url": "http://176.99.11.61:6060/getfile/doc_1_"+key+".docx"}
     
     say_hi()
     print("--- %s seconds ---" % (time.time() - start_time))

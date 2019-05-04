@@ -10,6 +10,13 @@ import time
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 
+@app.route('/getfile/<name>')
+def get_output_file(name):
+    try:
+        return send_file(name, as_attachment=True)
+    except:
+        return make_response(jsonify({"_status_code":404,"error":{"document":"file is not ready yet"}}),404)
+
 @app.route('/api/companies/<int:provider_inn>/documents', methods=['POST'])
 def main3(provider_inn):
     start_time = time.time()
