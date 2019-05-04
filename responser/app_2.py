@@ -25,7 +25,7 @@ def get_data_about_company(inn):
 
 #@app.after_response
 def say_hi():
-    link = 'http://localhost:6060/api/companies/'+provider_inn+'/documents'
+    link = 'http://176.99.11.61:6060/api/companies/'+provider_inn+'/documents'
     header = {'key':key}
     try:
         requests.post(link, data = json.dumps(existing_fields,ensure_ascii=True), headers = header, timeout=0.00001)
