@@ -17,7 +17,7 @@ def get_output_file(name):
     except:
         return make_response(jsonify({"_status_code":404,"error":{"document":"file is not ready yet"}}),404)
 
-@app.route('/api/companies/<int:provider_inn>/documents', methods=['POST'])
+@app.route('http://176.99.11.61:6060/api/companies/<int:provider_inn>/documents', methods=['POST'])
 def main3(provider_inn):
     start_time = time.time()
     provider_inn = str(provider_inn)
