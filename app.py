@@ -10,7 +10,7 @@ import time
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 
-@app.route('/getfile/<name>')
+@app.route('http://176.99.11.61:6060/getfile/<name>')
 def get_output_file(name):
     try:
         return send_file(name, as_attachment=True)

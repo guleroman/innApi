@@ -20,7 +20,7 @@ def get_data_about_company(inn):
 
 #@app.after_response
 def say_hi():#176.99.11.61
-    link = 'http://localhost:6060/api/companies/'+provider_inn+'/documents'
+    link = 'http://176.99.11.61:6060/api/companies/'+provider_inn+'/documents'
     header = {'key':key}
     try:
         requests.post(link, data = json.dumps(existing_fields,ensure_ascii=True), headers = header, timeout=0.00001)
@@ -358,7 +358,7 @@ def response(prov_inn):
     
     print("Принял - "+key)
     if existing_fields['template_code'] == 'vpbx':
-        responseJson = {"contractRT_url": "http://localhost:6060/getfile/doc_4_"+key+".docx","act_url": "http://localhost:6060/getfile/doc_2_"+key+".docx","invoice_url": "http://localhost:6060/getfile/doc_1_"+key+".docx"}
+        responseJson = {"contractRT_url": "http://176.99.11.61:6060/getfile/doc_4_"+key+".docx","act_url": "http://176.99.11.61:6060/getfile/doc_2_"+key+".docx","invoice_url": "http://176.99.11.61:6060/getfile/doc_1_"+key+".docx"}
     else:#176.99.11.61
         message['error'].update({"template_code":"incorrect mean"})
         message.update({"_status_code":422})
