@@ -356,8 +356,10 @@ def main3(provider_inn):
 
             'var17' : nds_4,
             'var18' : summa_str,
-            'var19' : num2words(int(summa), lang='ru')
+            'var19' : num2words(int(summa), lang='ru'),
+            'var00' : summa_str,
             }
+        #print (len(data_post['invoice']))
         doc.render(context)
         doc.save("doc_2_"+key+".docx")
 
