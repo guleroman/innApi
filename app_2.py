@@ -9,7 +9,8 @@ app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 #AfterResponse(app)
 
-
+#ip = 'http://176.99.11.61:6060'
+ip = 'http://localhost:6060'
 
 @app.route('/api/companies/<inn>',methods=['GET'])
 def get_data_about_company(inn):
@@ -20,10 +21,10 @@ def get_data_about_company(inn):
 
 #@app.after_response
 def say_hi():#176.99.11.61
-    link = 'http://176.99.11.61:6060/api/companies/'+provider_inn+'/documents'
+    link = ip + '/api/companies/'+provider_inn+'/documents'
     header = {'key':key}
     try:
-        requests.post(link, data = json.dumps(existing_fields,ensure_ascii=True), headers = header, timeout=0.00001)
+        requests.post(link, data = json.dumps(existing_fields,ensure_ascii=True), headers = header, timeout=0.0001)
     except:
         print ("Выполнил - "+key)
 
@@ -34,7 +35,8 @@ def response(prov_inn):
     
     provider_inn = str(prov_inn)
     key = str(uuid.uuid4())
-    data_post = json.loads(request.data)
+
+
     message = {"_status_code":200,"error":{}}
     existing_fields = {
         "client_inn":"",
@@ -64,11 +66,14 @@ def response(prov_inn):
         "contract_period":"",
         "advert_getting":True,
         "payment_frequency":"",
-        "invoice": [
-
-        ]
+       
     }
-
+    
+    try:
+        data_post = json.loads(request.data)
+    except:
+        message['error'].update({"info":"incorrect POST-request"})
+        message.update({"_status_code":422})
     def key_area():
         try:
             existing_fields.update({"client_inn":data_post['client_inn']})
@@ -308,6 +313,7 @@ def response(prov_inn):
 
         try:
             if len(data_post['payload']['invoice']) <= 5:
+                existing_fields.update({'invoice':[]}) 
                 for i in range(len(data_post['payload']['invoice'])):
                     try:
                         existing_fields['invoice'].append({})
@@ -341,6 +347,7 @@ def response(prov_inn):
                             message.update({"_status_code":422})
                     except:
                         pass
+                print (existing_fields['invoice'])
             else:
                 message.update({"_status_code":422})
                 message['error'].update({"invoice":"[] must be <= 5"})
@@ -358,8 +365,8 @@ def response(prov_inn):
     
     print("Принял - "+key)
     if existing_fields['template_code'] == 'vpbx':
-        responseJson = {"contractRT_url": "http://176.99.11.61:6060/getfile/doc_4_"+key+".docx","act_url": "http://176.99.11.61:6060/getfile/doc_2_"+key+".docx","invoice_url": "http://176.99.11.61:6060/getfile/doc_1_"+key+".docx"}
-    else:#176.99.11.61
+        responseJson = {"contract_url": ip +"/getfile/doc_4_"+key+".docx","act_url": ip+"/getfile/doc_2_"+key+".docx","invoice_url": ip+"/getfile/doc_1_"+key+".docx"}
+    else:
         message['error'].update({"template_code":"incorrect mean"})
         message.update({"_status_code":422})
         return make_response(jsonify(message),message['_status_code'])

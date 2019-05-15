@@ -1,11 +1,12 @@
 #!flask/bin/python
 from flask import Flask, jsonify, request, json, make_response, send_file
-from docxtpl import DocxTemplate
+from docxtpl import DocxTemplate,InlineImage
+from docx.shared import Mm
 from num2words import num2words   
 import innApi_v2, datetime
 import pandas as pd
 import time
-
+import qrcode
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
@@ -78,14 +79,14 @@ def main3(provider_inn):
         nds = 20
         nds_2 = "20 %"
         nds_3 = "НДС " + nds_2
-        nds_6 = ''
+       #nds_6 = ''
     else:
         nds = 0
         nds_2 = '-'
         nds_3 = ''
         nds_4 = ''
-        nds_5 = ''
-        nds_6 = 'Стоимость услуг НДС не облагается в связи с применением Исполнителем упрощенной системы налогообложения.'
+        #nds_5 = ''
+        #nds_6 = 'Стоимость услуг НДС не облагается в связи с применением Исполнителем упрощенной системы налогообложения.'
     
     # Поступающие данные в POST запросе
     #Данные о заказчике и перечне услуг,стоимости и тд.
@@ -185,25 +186,29 @@ def main3(provider_inn):
     #Заполняемм таблицу - товар/цена/стоимость и тд.
     summa = 0
     count = 0
+    bag = []
     table = pd.DataFrame({'t_num':[],'t_products':[],'t_kol':[],'t_ed':[],'t_nds':[],'t_price':[],'t_sum':[],'t_payment_frequency':[]})
     table = table[['t_num','t_products','t_kol','t_ed','t_nds','t_price','t_sum','t_payment_frequency']] 
-    for i in range(len(data_post['invoice'])):
-        table.loc[len(table)] = [
-            str(len(table)+1),
-            data_post['invoice'][i]['service_name'],
-            str(data_post['invoice'][i]['quantity']),
-            data_post['invoice'][i]['unit'],
-            nds_2,
-            '{0:.2f}'.format(data_post['invoice'][i]['cost']),
-            '{0:.2f}'.format(data_post['invoice'][i]['quantity'] * data_post['invoice'][i]['cost']),
-            payment_frequency]
-        count = count + data_post['invoice'][i]['quantity']
-        summa = summa + (data_post['invoice'][i]['quantity'] * data_post['invoice'][i]['cost'])
-    
+    try:
+        for i in range(len(data_post['invoice'])):
+            table.loc[len(table)] = [
+                str(len(table)+1),
+                data_post['invoice'][i]['service_name'],
+                str(data_post['invoice'][i]['quantity']),
+                data_post['invoice'][i]['unit'],
+                nds_2,
+                '{0:.2f}'.format(data_post['invoice'][i]['cost']),
+                '{0:.2f}'.format(data_post['invoice'][i]['quantity'] * data_post['invoice'][i]['cost']),
+                payment_frequency]
+            count = count + data_post['invoice'][i]['quantity']
+            summa = summa + (data_post['invoice'][i]['quantity'] * data_post['invoice'][i]['cost'])
+            bag.append({'n': table['t_num'][i], 'product': table['t_products'][i],'kol': table['t_kol'][i],'ed': table['t_ed'][i],'nds': table['t_nds'][i],'price': table['t_price'][i],'summ': table['t_sum'][i], 'param':str(table['t_kol'][i]+table['t_ed'][i]), 'period':payment_frequency})
+    except:
+        pass
     #Общая стоимость заказа
     if provider_nds == 1:
         nds_4 = round(summa / 1.2 * 0.2,2)
-        nds_5 = ', в том числе НДС:' + str(nds_4)
+        #nds_5 = ', в том числе НДС:' + str(nds_4)
     summa_str = '{0:.2f}'.format(summa)
 
     #Дозапоняем пустыми значениями
@@ -228,11 +233,29 @@ def main3(provider_inn):
     ##Счет на оплату
     #_____________________________________________________ 
     def write_invoice():
+        ##Узнать текущий месяц для оплаты периода
+        #_____________________________________________________        
         m = int(datetime.date.today().strftime('%m'))
         a = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь']
         year = datetime.date.today().strftime('%Y')
         data_invoice = (a[m-1]+' '+year)
+
+        ##QRCODE_GENERATION
+        #_____________________________________________________
+        img = qrcode.make(f'''ST00012|Name={provider_name}|
+                            PersonalAcc={provider_account1}|
+                            BankName={provider_bank}|
+                            BIC={provider_bik}|
+                            CorrespAcc={provider_account2}|
+                            LastName={data['data']['management']['name'].split()[0]}|
+                            FirstName={data['data']['management']['name'].split()[1]}|
+                            MiddleName={data['data']['management']['name'].split()[2]}|
+                            Purpose=Оплата услуги Виртуальная АТС за {data_invoice} года|
+                            Sum={'{0:.0f}'.format(float(summa_str)*100)}''')
+        img.save('qr_'+key+'.png')
+
         doc = DocxTemplate("tpl_invoice.docx")
+        myimage = InlineImage(doc,'qr_'+key+'.png',width=Mm(30))
         context = { 
             'var0' : nds,
             'var1' : provider_bank,
@@ -251,57 +274,18 @@ def main3(provider_inn):
             'var14' : data['data']['address']['value'],
             'var15' : nds_3,
             'var16' : (datetime.datetime.now() + datetime.timedelta(days=3)).strftime('%d.%m.%Y'),
-            
-            'n1' : table.iloc[0]['t_num'],
-            'n2' : table.iloc[1]['t_num'],
-            'n3' : table.iloc[2]['t_num'],
-            'n4' : table.iloc[3]['t_num'],
-            'n5' : table.iloc[4]['t_num'],
-            
-            'product1' : table.iloc[0]['t_products'],
-            'product2' : table.iloc[1]['t_products'],
-            'product3' : table.iloc[2]['t_products'],
-            'product4' : table.iloc[3]['t_products'],
-            'product5' : table.iloc[4]['t_products'],
-            
-            'kol1' : table.iloc[0]['t_kol'],
-            'kol2' : table.iloc[1]['t_kol'],
-            'kol3' : table.iloc[2]['t_kol'],
-            'kol4' : table.iloc[3]['t_kol'],
-            'kol5' : table.iloc[4]['t_kol'],
-            
-            'ed1' : table.iloc[0]['t_ed'],
-            'ed2' : table.iloc[1]['t_ed'],
-            'ed3' : table.iloc[2]['t_ed'],
-            'ed4' : table.iloc[3]['t_ed'],
-            'ed5' : table.iloc[4]['t_ed'],
-
-            'nds1' : table.iloc[0]['t_nds'],
-            'nds2' : table.iloc[1]['t_nds'],
-            'nds3' : table.iloc[2]['t_nds'],
-            'nds4' : table.iloc[3]['t_nds'],
-            'nds5' : table.iloc[4]['t_nds'],
-            
-            'price1' : table.iloc[0]['t_price'],
-            'price2' : table.iloc[1]['t_price'],
-            'price3' : table.iloc[2]['t_price'],
-            'price4' : table.iloc[3]['t_price'],
-            'price5' : table.iloc[4]['t_price'],
-            
-            'summ1' : table.iloc[0]['t_sum'],
-            'summ2' : table.iloc[1]['t_sum'],
-            'summ3' : table.iloc[2]['t_sum'],
-            'summ4' : table.iloc[3]['t_sum'],
-            'summ5' : table.iloc[4]['t_sum'],
-
             'var17' : nds_4,
             'var18' : summa_str,
-            'var19' : num2words(int(summa), lang='ru'),
+            'var19' : num2words(int(summa), lang='ru').capitalize(),
             'var20' : data_invoice,
             'var21' : count,
+            'var22' : product_name,
+            'qrcode': myimage,
+            'tbl_contents': bag,
 
             }
         doc.render(context)
+        #myimage = InlineImage(doc,'test_files/python_logo.png',width=Mm(20))
         doc.save("doc_1_"+key+".docx")
 
     ##Акт о проделанных работах
@@ -320,53 +304,12 @@ def main3(provider_inn):
             'var13' : data['data']['kpp'],
             'var14' : data['data']['address']['value'],
             'var15' : nds_3,
-            
-            'n1' : table.iloc[0]['t_num'],
-            'n2' : table.iloc[1]['t_num'],
-            'n3' : table.iloc[2]['t_num'],
-            'n4' : table.iloc[3]['t_num'],
-            'n5' : table.iloc[4]['t_num'],
-            
-            'product1' : table.iloc[0]['t_products'],
-            'product2' : table.iloc[1]['t_products'],
-            'product3' : table.iloc[2]['t_products'],
-            'product4' : table.iloc[3]['t_products'],
-            'product5' : table.iloc[4]['t_products'],
-            
-            'kol1' : table.iloc[0]['t_kol'],
-            'kol2' : table.iloc[1]['t_kol'],
-            'kol3' : table.iloc[2]['t_kol'],
-            'kol4' : table.iloc[3]['t_kol'],
-            'kol5' : table.iloc[4]['t_kol'],
-            
-            'ed1' : table.iloc[0]['t_ed'],
-            'ed2' : table.iloc[1]['t_ed'],
-            'ed3' : table.iloc[2]['t_ed'],
-            'ed4' : table.iloc[3]['t_ed'],
-            'ed5' : table.iloc[4]['t_ed'],
-
-            'nds1' : table.iloc[0]['t_nds'],
-            'nds2' : table.iloc[1]['t_nds'],
-            'nds3' : table.iloc[2]['t_nds'],
-            'nds4' : table.iloc[3]['t_nds'],
-            'nds5' : table.iloc[4]['t_nds'],
-            
-            'price1' : table.iloc[0]['t_price'],
-            'price2' : table.iloc[1]['t_price'],
-            'price3' : table.iloc[2]['t_price'],
-            'price4' : table.iloc[3]['t_price'],
-            'price5' : table.iloc[4]['t_price'],
-            
-            'summ1' : table.iloc[0]['t_sum'],
-            'summ2' : table.iloc[1]['t_sum'],
-            'summ3' : table.iloc[2]['t_sum'],
-            'summ4' : table.iloc[3]['t_sum'],
-            'summ5' : table.iloc[4]['t_sum'],
 
             'var17' : nds_4,
             'var18' : summa_str,
-            'var19' : num2words(int(summa), lang='ru'),
+            'var19' : num2words(int(summa), lang='ru').capitalize(),
             'var20' : count,#len(data_post['invoice']),
+            'tbl_contents': bag,
 
             }
         #print (len(data_post['invoice']))
@@ -503,36 +446,7 @@ def main3(provider_inn):
             'var40_1' : contract_period_1,
             'var40_2' : contract_period_2,
             'var41_1' : advert_getting_1,
-
-            'product1' : table.iloc[0]['t_products'],
-            'product2' : table.iloc[1]['t_products'],
-            'product3' : table.iloc[2]['t_products'],
-            'product4' : table.iloc[3]['t_products'],
-            'product5' : table.iloc[4]['t_products'],
-            
-            'kol1' : table.iloc[0]['t_kol'],
-            'kol2' : table.iloc[1]['t_kol'],
-            'kol3' : table.iloc[2]['t_kol'],
-            'kol4' : table.iloc[3]['t_kol'],
-            'kol5' : table.iloc[4]['t_kol'],
-            
-            'ed1' : table.iloc[0]['t_ed'],
-            'ed2' : table.iloc[1]['t_ed'],
-            'ed3' : table.iloc[2]['t_ed'],
-            'ed4' : table.iloc[3]['t_ed'],
-            'ed5' : table.iloc[4]['t_ed'],
-
-            'summ1' : table.iloc[0]['t_sum'],
-            'summ2' : table.iloc[1]['t_sum'],
-            'summ3' : table.iloc[2]['t_sum'],
-            'summ4' : table.iloc[3]['t_sum'],
-            'summ5' : table.iloc[4]['t_sum'],
-
-            'payment1' : table.iloc[0]['t_payment_frequency'],
-            'payment2' : table.iloc[1]['t_payment_frequency'],
-            'payment3' : table.iloc[2]['t_payment_frequency'],
-            'payment4' : table.iloc[3]['t_payment_frequency'],
-            'payment5' : table.iloc[4]['t_payment_frequency'],
+            'tbl_contents': bag,
 
             }
         doc.render(context)

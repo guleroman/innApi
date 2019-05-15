@@ -5,3 +5,5 @@ docxtpl
 num2words
 pandas
 uuid
+qrcode
+docx
