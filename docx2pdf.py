@@ -1,15 +1,15 @@
-import sys, time
-import os
-import comtypes.client
-start_time = time.time()
-wdFormatPDF = 17
+import win32com.client as client
 
-#in_file = os.path.abspath(sys.argv[1])
-#out_file = os.path.abspath(sys.argv[2])
 
-word = comtypes.client.CreateObject('Word.Application')
-doc = word.Documents.Open('D:/github/innApi/tpl_invoice_4.docx')
-doc.SaveAs('D:/github/innApi/tpl_4.pdf', FileFormat=wdFormatPDF)
-doc.Close()
-word.Quit()
-print("--- %s seconds ---" % (time.time() - start_time))
+def word2pdf(filepath:str):
+    """Save a pdf of a docx file."""    
+    try:
+        word = client.DispatchEx("Word.Application")
+        target_path = filepath.replace(".docx", r".pdf")
+        word_doc = word.Documents.Open(filepath)
+        word_doc.SaveAs(target_path, FileFormat=17)
+        word_doc.Close()
+    except Exception as e:
+            raise e
+    finally:
+            word.Quit()

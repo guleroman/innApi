@@ -7,9 +7,16 @@ import innApi_v2, datetime
 import pandas as pd
 import time
 import qrcode
+from subprocess import call
+
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
+
+def convert_file(output_dir, input_file):
+    call('libreoffice --headless --convert-to pdf --outdir %s %s ' %
+         (output_dir, input_file), shell=True)
+
 
 @app.route('/getfile/<name>')
 def get_output_file(name):
@@ -286,8 +293,10 @@ def main3(provider_inn):
             }
         doc.render(context)
         #myimage = InlineImage(doc,'test_files/python_logo.png',width=Mm(20))
+        
+        #print (namme,"\n",pwd)
         doc.save("doc_1_"+key+".docx")
-
+        convert_file("doc_1_"+key+".pdf","doc_1_"+key+".docx")
     ##Акт о проделанных работах
     #_____________________________________________________
     def write_act():
