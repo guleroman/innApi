@@ -21,7 +21,7 @@ def convert_file(input_file,output_file):
         'format': (None, 'pdf'),
         'file': (input_file, open(input_file, 'rb')),
     }
-    response = requests.post('http://localhost:3000/convert', files=files)
+    response = requests.post('http://176.99.11.61:3000/convert', files=files)
     with open(output_file, mode="wb") as new:
         new.write(response.content)
 
