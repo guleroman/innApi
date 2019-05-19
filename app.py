@@ -7,7 +7,8 @@ import innApi_v2, datetime
 import pandas as pd
 import time
 import qrcode
-from to_pdf import convert_file
+import requests
+
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
@@ -15,12 +16,14 @@ app.config['JSON_AS_ASCII'] = False
 #ip = 'http://176.99.11.61:6060'
 #ip = 'http://localhost:5555'
 
-#def say_hii(input_file):#176.99.11.61
-#    link = ip + '/converter/'+input_file
-#    #try:
-#    requests.post(link)#, timeout=0.0001)
-#    #except:
-#    print ("Выполнил - ")
+def convert_file(input_file,output_file):
+    files = {
+        'format': (None, 'pdf'),
+        'file': (input_file, open(input_file, 'rb')),
+    }
+    response = requests.post('http://localhost:3000/convert', files=files)
+    with open(output_file, mode="wb") as new:
+        new.write(response.content)
 
 @app.route('/getfile/<name>')
 def get_output_file(name):
@@ -300,7 +303,7 @@ def main3(provider_inn):
         
         #print (namme,"\n",pwd)
         doc.save("doc_1_"+key+".docx")
-        convert_file("doc_1_"+key+".pdf","doc_1_"+key+".docx")
+        convert_file("doc_1_"+key+".docx","doc_1_"+key+".pdf")
     ##Акт о проделанных работах
     #_____________________________________________________
     def write_act():
@@ -328,7 +331,7 @@ def main3(provider_inn):
         #print (len(data_post['invoice']))
         doc.render(context)
         doc.save("doc_2_"+key+".docx")
-
+        convert_file("doc_2_"+key+".docx","doc_2_"+key+".pdf")
     ##Договор о предоставлении услуг
     #_____________________________________________________
     #def write_contract():
@@ -464,7 +467,7 @@ def main3(provider_inn):
             }
         doc.render(context)
         doc.save("doc_4_"+key+".docx")
-
+        convert_file("doc_4_"+key+".docx","doc_4_"+key+".pdf")
 
     ##Условия для создания шаблонов
     #_____________________________________________________

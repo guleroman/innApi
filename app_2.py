@@ -365,7 +365,7 @@ def response(prov_inn):
     
     print("Принял - "+key)
     if existing_fields['template_code'] == 'vpbx':
-        responseJson = {"contract_url": ip +"/getfile/doc_4_"+key+".docx","act_url": ip+"/getfile/doc_2_"+key+".docx","invoice_url": ip+"/getfile/doc_1_"+key+".docx"}
+        responseJson = {"contract_url": ip +"/getfile/doc_4_"+key+".pdf","act_url": ip+"/getfile/doc_2_"+key+".pdf","invoice_url": ip+"/getfile/doc_1_"+key+".pdf"}
     else:
         message['error'].update({"template_code":"incorrect mean"})
         message.update({"_status_code":422})
