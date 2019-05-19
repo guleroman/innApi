@@ -7,16 +7,21 @@ import innApi_v2, datetime
 import pandas as pd
 import time
 import qrcode
-from subprocess import call
+import requests
 
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 
-def convert_file(output_dir, input_file):
-    call('libreoffice --headless --convert-to pdf --outdir %s %s ' %
-         (output_dir, input_file), shell=True)
+#ip = 'http://176.99.11.61:6060'
+ip = 'http://localhost:5555'
 
+def say_hii(input_file):#176.99.11.61
+    link = ip + '/converter/'+input_file
+    #try:
+    requests.post(link, timeout=0.0001)
+    #except:
+    print ("Выполнил - ")
 
 @app.route('/getfile/<name>')
 def get_output_file(name):
@@ -296,7 +301,7 @@ def main3(provider_inn):
         
         #print (namme,"\n",pwd)
         doc.save("doc_1_"+key+".docx")
-        convert_file("doc_1_"+key+".pdf","doc_1_"+key+".docx")
+        say_hii("doc_1_"+key+".docx")
     ##Акт о проделанных работах
     #_____________________________________________________
     def write_act():
