@@ -243,7 +243,7 @@ def main3(provider_inn):
         try:
             client_kpp = data['data']['kpp']
         except:
-            pass
+            client_kpp = '-'
 
 
     try:
