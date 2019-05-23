@@ -69,6 +69,7 @@ def response(prov_inn):
        
     }
     
+    
     try:
         data_post = json.loads(request.data)
     except:
