@@ -40,8 +40,8 @@ def main3(provider_inn):
     with open('company.json', 'r', encoding='utf-8') as fh: #открываем файл с данными о исполнителях на чтение
         company = json.load(fh)
 
-    with open("iteration.json", "r") as read_file: #открываем файл с количеством оформленных документов (итератор)
-        num = json.load(read_file)
+    #with open("iteration.json", "r") as read_file: #открываем файл с количеством оформленных документов (итератор)
+    #    num = json.load(read_file)
 
 
     #Данные о исполнителе
@@ -104,10 +104,12 @@ def main3(provider_inn):
     
     # Поступающие данные в POST запросе
     #Данные о заказчике и перечне услуг,стоимости и тд.
+    num = {"number":""}
     data_post = json.loads(request.data) 
     client_inn = data_post['client_inn'] # инн - заказчика
     client_kpp = data_post['client_kpp']
     template_code = data_post['template_code']
+    num.update({"number":data_post['request_number']})
     product_name = data_post['product_name']
     tariff_name = data_post['tariff_name']
     tariff_users_count = str(data_post['tariff_users_count'])
@@ -216,7 +218,7 @@ def main3(provider_inn):
                 payment_frequency]
             count = count + data_post['invoice'][i]['quantity']
             summa = summa + (data_post['invoice'][i]['quantity'] * data_post['invoice'][i]['cost'])
-            bag.append({'n': table['t_num'][i], 'product': table['t_products'][i],'kol': table['t_kol'][i],'ed': table['t_ed'][i],'nds': table['t_nds'][i],'price': table['t_price'][i],'summ': table['t_sum'][i], 'param':str(table['t_kol'][i]+table['t_ed'][i]), 'period':payment_frequency})
+            bag.append({'n': table['t_num'][i], 'product': table['t_products'][i],'kol': table['t_kol'][i],'ed': table['t_ed'][i],'nds': table['t_nds'][i],'price': table['t_price'][i],'summ': table['t_sum'][i], 'param':str(table['t_kol'][i]+' '+table['t_ed'][i]), 'period':payment_frequency})
     except:
         pass
     #Общая стоимость заказа
@@ -500,9 +502,9 @@ def main3(provider_inn):
     #    json.dump(history, write_file)    
 
     #Плюсуем итератор количества оформленых документов
-    num['number'] = num['number'] + 1
-    with open("iteration.json", "w") as write_file:
-        json.dump(num, write_file)
+    #num['number'] = num['number'] + 1
+    #with open("iteration.json", "w") as write_file:
+    #    json.dump(num, write_file)
     print("--- %s seconds ---" % (time.time() - start_time))
     #Формируем ответ    
     #responseJson = {"contractRT_url": "/getfile/doc_4_"+key+".docx","contract_url": "/getfile/doc_3_"+key+".docx","act_url": "/getfile/doc_2_"+key+".docx","invoice_url": "/getfile/doc_1_"+key+".docx"}

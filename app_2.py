@@ -9,8 +9,8 @@ app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 #AfterResponse(app)
 
-ip = 'http://176.99.11.61:6060'
-#ip = 'http://localhost:6060'
+#ip = 'http://176.99.11.61:6060'
+ip = 'http://localhost:6060'
 
 @app.route('/api/companies/<inn>',methods=['GET'])
 def get_data_about_company(inn):
@@ -42,6 +42,7 @@ def response(prov_inn):
         "client_inn":"",
         "client_kpp":"",
         "template_code":"",
+        "request_number":"",
         "product_name":"",
         "tariff_name":"",
         "tariff_users_count":0,
@@ -101,6 +102,15 @@ def response(prov_inn):
                 message.update({"_status_code":422})
         except:           
             message['error'].update({"template_code":"required field"})
+            message.update({"_status_code":422})
+
+        try:
+            existing_fields.update({"request_number":data_post['payload']['request_number']})
+            if type(existing_fields['request_number']) is not str:
+                message['error'].update({"request_number":"string is expected"})
+                message.update({"_status_code":422})
+        except:           
+            message['error'].update({"request_number":"required field"})
             message.update({"_status_code":422})
 
         try:        
