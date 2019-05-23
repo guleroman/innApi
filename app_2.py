@@ -66,7 +66,6 @@ def response(prov_inn):
         "information_about_caller_using":"",
         "contract_period":"",
         "advert_getting":True,
-        "payment_frequency":"",
        
     }
     
@@ -140,14 +139,6 @@ def response(prov_inn):
             #message['error'].update({"client_inn":"required field"})
             pass
 
-        try:
-            existing_fields.update({"payment_frequency":data_post['payload']['payment_frequency']})
-            if type(existing_fields['payment_frequency']) is not str:
-                message['error'].update({"payment_frequency":"string is expected"})
-                message.update({"_status_code":422})
-        except:           
-            #message['error'].update({"client_inn":"required field"})
-            pass
 
         try:
             existing_fields.update({"tariff_notincluded_users_count":data_post['payload']['tariff_notincluded_users_count']})
@@ -357,6 +348,16 @@ def response(prov_inn):
                             message.update({"_status_code":422})
                     except:
                         pass
+
+                    try:
+                        existing_fields['invoice'][i].update({"payment_frequency":data_post['payload']['invoice'][i]['payment_frequency']})
+                        if  type(existing_fields['invoice'][i]['payment_frequency']) is not str:
+                            message['error'].update({"payment_frequency":"string is expected"})
+                            message.update({"_status_code":422})
+                        existing_fields['invoice'][i]['payment_frequency'] = existing_fields['invoice'][i]['payment_frequency'].replace("once","Единовременный").replace("monthly","Ежемесячный").replace("annually","Ежегодный")
+                    except:
+                        message['error'].update({"payment_frequency":"required field"})
+                        message.update({"_status_code":422})
                 print (existing_fields['invoice'])
             else:
                 message.update({"_status_code":422})

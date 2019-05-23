@@ -113,7 +113,6 @@ def main3(provider_inn):
     product_name = data_post['product_name']
     tariff_name = data_post['tariff_name']
     tariff_users_count = str(data_post['tariff_users_count'])
-    payment_frequency = data_post['payment_frequency']
     tariff_notincluded_users_count = str(data_post['tariff_notincluded_users_count'])
     tariff_included_minuts_count = str(data_post['tariff_included_minuts_count'])
     tariff_abonent_number_abc = data_post['tariff_abonent_number_abc']
@@ -215,10 +214,10 @@ def main3(provider_inn):
                 nds_2,
                 '{0:.2f}'.format(data_post['invoice'][i]['cost']),
                 '{0:.2f}'.format(data_post['invoice'][i]['quantity'] * data_post['invoice'][i]['cost']),
-                payment_frequency]
+                data_post['invoice'][i]['payment_frequency']]
             count = count + data_post['invoice'][i]['quantity']
             summa = summa + (data_post['invoice'][i]['quantity'] * data_post['invoice'][i]['cost'])
-            bag.append({'n': table['t_num'][i], 'product': table['t_products'][i],'kol': table['t_kol'][i],'ed': table['t_ed'][i],'nds': table['t_nds'][i],'price': table['t_price'][i],'summ': table['t_sum'][i], 'param':str(table['t_kol'][i]+' '+table['t_ed'][i]), 'period':payment_frequency})
+            bag.append({'n': table['t_num'][i], 'product': table['t_products'][i],'kol': table['t_kol'][i],'ed': table['t_ed'][i],'nds': table['t_nds'][i],'price': table['t_price'][i],'summ': table['t_sum'][i], 'param':str(table['t_kol'][i]+' '+table['t_ed'][i]), 'period':table['t_payment_frequency'][i]})
     except:
         pass
     #Общая стоимость заказа
@@ -420,7 +419,7 @@ def main3(provider_inn):
             'var5' : data['data']['management']['name'].split()[2],
             'var6' : data['data']['address']['data']['postal_code'],
             'var7' : data['data']['address']['data']['region'],
-            'var8' : data['data']['address']['data']['city_district'],
+            'var8' : str(data['data']['address']['data']['city_district']).replace('None',''),
             'var9' : data['data']['address']['data']['city'],
             'var10' : data['data']['address']['data']['street_with_type'],
             'var11' : data['data']['address']['data']['house'],
