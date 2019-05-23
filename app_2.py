@@ -9,8 +9,8 @@ app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 #AfterResponse(app)
 
-ip = 'http://176.99.11.61:6060'
-#ip = 'http://localhost:6060'
+#ip = 'http://176.99.11.61:6060'
+ip = 'http://localhost:6060'
 
 @app.route('/api/companies/<inn>',methods=['GET'])
 def get_data_about_company(inn):
@@ -23,6 +23,7 @@ def get_data_about_company(inn):
 def say_hi():#176.99.11.61
     link = ip + '/api/companies/'+provider_inn+'/documents'
     header = {'key':key}
+    print (existing_fields)
     try:
         requests.post(link, data = json.dumps(existing_fields,ensure_ascii=True), headers = header, timeout=0.0001)
     except:

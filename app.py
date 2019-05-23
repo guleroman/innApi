@@ -240,10 +240,22 @@ def main3(provider_inn):
 
     #Дополнительное КПП клиента
     if client_kpp == '':
-        client_kpp = data['data']['kpp']
+        try:
+            client_kpp = data['data']['kpp']
+        except:
+            pass
 
 
-
+    try:
+        name_0 = data['data']['management']['name']
+        name_1 = data['data']['management']['name'].split()[0]
+        name_2 = data['data']['management']['name'].split()[1]
+        name_3 = data['data']['management']['name'].split()[2]
+    except:
+        name_0 = data['data']['name']['full']
+        name_1 = data['data']['name']['full'].split()[0]
+        name_2 = data['data']['name']['full'].split()[1]
+        name_3 = data['data']['name']['full'].split()[2]
     #Генерация документов
     ##Счет на оплату
     #_____________________________________________________ 
@@ -262,9 +274,9 @@ def main3(provider_inn):
                             BankName={provider_bank}|
                             BIC={provider_bik}|
                             CorrespAcc={provider_account2}|
-                            LastName={data['data']['management']['name'].split()[0]}|
-                            FirstName={data['data']['management']['name'].split()[1]}|
-                            MiddleName={data['data']['management']['name'].split()[2]}|
+                            LastName={name_1}|
+                            FirstName={name_2}|
+                            MiddleName={name_3}|
                             Purpose=Оплата услуги Виртуальная АТС за {data_invoice} года|
                             Sum={'{0:.0f}'.format(float(summa_str)*100)}''')
         img.save('qr_'+key+'.png')
@@ -285,7 +297,7 @@ def main3(provider_inn):
             'var10' : provider_address,
             'var11' : data['value'],
             'var12' : data['data']['inn'],
-            'var13' : data['data']['kpp'],
+            'var13' : client_kpp,
             'var14' : data['data']['address']['value'],
             'var15' : nds_3,
             'var16' : (datetime.datetime.now() + datetime.timedelta(days=3)).strftime('%d.%m.%Y'),
@@ -318,7 +330,7 @@ def main3(provider_inn):
             'var10' : provider_address,
             'var11' : data['value'],
             'var12' : data['data']['inn'],
-            'var13' : data['data']['kpp'],
+            'var13' : client_kpp,
             'var14' : data['data']['address']['value'],
             'var15' : nds_3,
 
@@ -410,25 +422,26 @@ def main3(provider_inn):
     #_____________________________________________________
     def write_contract_RT():
         doc = DocxTemplate("tpl_invoice_4.docx")
+
         context = {
             'var0' : datetime.datetime.today().strftime("%d.%m.%Y"),
             'var1' : data['data']['name']['full_with_opf'],
             'var2' : data['data']['address']['data']["city_with_type"],
-            'var3' : data['data']['management']['name'].split()[0],
-            'var4' : data['data']['management']['name'].split()[1],
-            'var5' : data['data']['management']['name'].split()[2],
-            'var6' : data['data']['address']['data']['postal_code'],
-            'var7' : data['data']['address']['data']['region'],
+            'var3' : name_1,
+            'var4' : name_2,
+            'var5' : name_3,
+            'var6' : str(data['data']['address']['data']['postal_code']).replace('None',''),
+            'var7' : str(data['data']['address']['data']['region']).replace('None',''),
             'var8' : str(data['data']['address']['data']['city_district']).replace('None',''),
-            'var9' : data['data']['address']['data']['city'],
-            'var10' : data['data']['address']['data']['street_with_type'],
-            'var11' : data['data']['address']['data']['house'],
-            'var12' : data['data']['address']['value'],
+            'var9' : str(data['data']['address']['data']['city']).replace('None',''),
+            'var10' : str(data['data']['address']['data']['street_with_type']).replace('None',''),
+            'var11' : str(data['data']['address']['data']['house']).replace('None',''),
+            'var12' : str(data['data']['address']['value']).replace('None',''),
             'var13' : data['data']['ogrn'],
             'var14' : data['data']['inn'],
             'var15' : client_kpp,
             'var16' : data['data']['okpo'],
-            'var17' : data['data']['management']['name'],
+            'var17' : name_0,
             'var18' : product_name,
             'var19' : num['number'],
             'var20' : tariff_name,
