@@ -1,67 +1,34 @@
 # Веб-сервис для получения юридической информации об организации по ИНН
 
-## Deployment
-### 1. With Dockerfile
-#### 1.1 Download the full repository located on this page
-```
-D:\> git clone https://github.com/guleroman/innApi.git
-```
-#### 1.2 Install docker
-#### 1.3 Build.. 
+[Данные о компании по ИНН](./Untitled-364bc594-bf55-438b-8062-50688ac68775.md)
 
-```
-D:\> cd innApi
-D:\innApi> docker build -t innapi .
-```
+[Автоматизированное формирование учетных документов](./Untitled-843a3f50-d07c-4dbe-8726-d244bcf6dd54.md)
 
-..then Run (where x.x.x.x - you host)
+[https://github.com/guleroman/innApi](https://github.com/guleroman/innApi)
 
-```
-D:\innApi> docker run --name innapi -p x.x.x.x:8888:5000 -d innapi 
-```
+Сервис по формированию данных компании и документов по API. Никакого UI. 
 
-#### 1.4 Enjoy
+- Получение по API ИНН
+- Формирование данных компании по ИНН
+- Отдача данных компании
+- Формирование Документов
+- Отдача ссылок на документы
 
-In browser... (where 7704252261 - INN)
-```
-D:\innApi> http://x.x.x.x:8888/api/?inn=7704252261
-```
-![img](/img/img1.jpg)
+## Deployment with Dockerfile:
 
+### 1.1 Download the full repository located on this page
 
+    D:\> git clone https://github.com/guleroman/innApi.git
 
-### 2. No Dockerfile
-#### 2.1 Download the full repository located on this page
-```
-D:\> git clone https://github.com/guleroman/innApi.git
-```
-#### 2.2 Install requirements
+### 1.2 Build..
 
-```
-D:\> cd innApi
-D:\innApi> pip install -r requirements.txt 
-```
+    D:\> cd innApi
+    D:\innApi> docker build -t innapi .
+    D:\innApi> docker build -t innapi_2 ./responser
 
-#### 2.3 Run..
+### 1.3 ..then Run
 
-```
-D:\innApi> python app.py 
-```
+    D:\innApi> docker run --name innapi_2 -p 8888:5000 -d innapi_2
+    D:\innApi> docker run --name innapi -p 6060:6060 -d innapi
 
-#### 2.4 Enjoy
-
-In browser...  
-```
-D:\> http://x.x.x.x:5000/api/?inn=7715650793
-```
-![img](/img/img2.jpg)
-
-## Requirements
-python 3.x.x
-
-requests
-
-bs4
-
-flask
-
+![](2-dcfe768e-00ac-4315-ab2a-d05cd307ab63.jpg)
