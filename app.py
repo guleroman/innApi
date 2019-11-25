@@ -274,9 +274,9 @@ def main3(provider_inn):
                             BankName={provider_bank}|
                             BIC={provider_bik}|
                             CorrespAcc={provider_account2}|
-                            LastName={name_1}|
-                            FirstName={name_2}|
-                            MiddleName={name_3}|
+                            LastName=Любачев|
+                            FirstName=Андрей|
+                            MiddleName=Леонидович|
                             Purpose=Оплата услуги Виртуальная АТС за {data_invoice} года|
                             Sum={'{0:.0f}'.format(float(summa_str)*100)}''')
         img.save('qr_'+key+'.png')
