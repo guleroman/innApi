@@ -9,8 +9,8 @@ app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 #AfterResponse(app)
 
-#ip = 'http://176.99.11.61:6060'
-ip = 'http://localhost:6060'
+ip = 'http://176.99.11.61:6060'
+#ip = 'http://localhost:6060'
 
 @app.route('/api/companies/<inn>',methods=['GET'])
 def get_data_about_company(inn):
